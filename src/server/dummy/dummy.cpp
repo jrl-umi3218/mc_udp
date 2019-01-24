@@ -19,13 +19,15 @@ int main(int argc, char * argv[])
   auto & sensors = server.sensors();
   sensors.encoders = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   sensors.torques = {100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110};
-  sensors.fsensors =
+  double reading[6];
+  for(size_t i = 0; i < 6; ++i)
   {
-    {"rfsensor", {1,2,3,4,5,6}},
-    {"lfsensor", {10,20,30,40,50,60}},
-    {"rhsensor", {100,200,300,400,500,600}},
-    {"lhsensor", {1000,2000,3000,4000,5000,6000}}
-  };
+    reading[i] = i + 1;
+  }
+  sensors.fsensor("rfsensor", reading);
+  sensors.fsensor("lfsensor", reading);
+  sensors.fsensor("rhsensor", reading);
+  sensors.fsensor("lhsensor", reading);
   sensors.orientation[0] = 1;
   sensors.orientation[1] = 2;
   sensors.orientation[2] = 3;

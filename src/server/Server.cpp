@@ -2,6 +2,8 @@
 
 #include <mc_nng/logging.h>
 
+#include <stdexcept>
+
 namespace mc_nng
 {
 
@@ -12,7 +14,7 @@ Server::Server(const std::string & uri, int timeout)
 
 bool Server::recv()
 {
-  uint8_t * buffer = nullptr;
+  uint8_t * buffer = NULL;
   size_t size = 0;
   int err = nng_recv(socket_, &buffer, &size, NNG_FLAG_ALLOC);
   if(err == 0)
@@ -74,7 +76,7 @@ void Server::start(const std::string & uri, int timeout)
   {
     MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to create socket: " << nng_strerror(err))
   }
-  err = nng_listen(socket_, uri.c_str(), nullptr, 0);
+  err = nng_listen(socket_, uri.c_str(), NULL, 0);
   if(err != 0)
   {
     MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to create listener: " << nng_strerror(err))

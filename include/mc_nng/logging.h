@@ -8,11 +8,11 @@
 namespace mc_nng
 {
 
-constexpr auto OUT_NONE = "\033[00m";
-constexpr auto OUT_BLUE = "\033[01;34m";
-constexpr auto OUT_GREEN = "\033[01;32m";
-constexpr auto OUT_PURPLE = "\033[01;35m";
-constexpr auto OUT_RED = "\033[01;31m";
+static const char * OUT_NONE = "\033[00m";
+static const char * OUT_BLUE = "\033[01;34m";
+static const char * OUT_GREEN = "\033[01;32m";
+static const char * OUT_PURPLE = "\033[01;35m";
+static const char * OUT_RED = "\033[01;31m";
 
 } // namespace mc_nng
 
@@ -27,11 +27,11 @@ constexpr auto OUT_RED = "\033[01;31m";
 namespace mc_nng
 {
 static const HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-constexpr auto OUT_NONE = 15;
-constexpr auto OUT_BLUE = 11;
-constexpr auto OUT_GREEN = 10;
-constexpr auto OUT_PURPLE = 13;
-constexpr auto OUT_RED = 12;
+static const int OUT_NONE = 15;
+static const int OUT_BLUE = 11;
+static const int OUT_GREEN = 10;
+static const int OUT_PURPLE = 13;
+static const int OUT_RED = 12;
 } // namespace mc_nng
 
 #  define MC_NNG_ERROR(args)                                       \
