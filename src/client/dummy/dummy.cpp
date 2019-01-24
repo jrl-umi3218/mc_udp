@@ -36,7 +36,6 @@ int main(int argc, char * argv[])
       //                                       << fs.reading[4] << ", "
       //                                       << fs.reading[5] << "\n";
       //}
-      std::cout << "id: " << control.id << " encoders size: " << client.control().encoders.size() << "\n";
       client.send();
     }
   }

@@ -33,10 +33,16 @@ int main(int argc, char * argv[])
   };
   uint64_t prev_id = 0;
   std::vector<double> qInit;
+  using duration_ms = std::chrono::duration<double, std::milli>;
+  duration_ms tcp_run_dt{0};
+  controller.controller().logger().addLogEntry("perf_TCP", [&tcp_run_dt]() { return tcp_run_dt.count(); });
   while(1)
   {
+    using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
+                                            std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
     if(client.recv())
     {
+      auto start = clock::now();
       controller.setEncoderValues(client.sensors().encoders);
       controller.setJointTorques(client.sensors().torques);
       Eigen::Vector3d rpy;
@@ -68,50 +74,50 @@ int main(int argc, char * argv[])
         {
           LOG_WARNING("[MCControlNNG] Missed one or more sensors reading (previous id: " << prev_id << ", current id: " << client.sensors().id << ")")
         }
-      }
-      prev_id = client.sensors().id;
-      if(controller.run())
-      {
-        const auto & robot = controller.robot();
-        const auto & mbc = robot.mbc();
-        const auto & rjo = controller.ref_joint_order();
-        auto & qOut = client.control().encoders;
-        if(qOut.size() != rjo.size())
+        if(controller.run())
         {
-          qOut.resize(rjo.size());
-        }
-        for(size_t i = 0; i < rjo.size(); ++i)
-        {
-          const auto & jN = rjo[i];
-          bool skipJoint = false;
-          if(std::find(ignoredJoints.begin(), ignoredJoints.end(), jN) == ignoredJoints.end())
+          const auto & robot = controller.robot();
+          const auto & mbc = robot.mbc();
+          const auto & rjo = controller.ref_joint_order();
+          auto & qOut = client.control().encoders;
+          if(qOut.size() != rjo.size())
           {
-            if(robot.hasJoint(jN))
+            qOut.resize(rjo.size());
+          }
+          for(size_t i = 0; i < rjo.size(); ++i)
+          {
+            const auto & jN = rjo[i];
+            bool skipJoint = false;
+            if(std::find(ignoredJoints.begin(), ignoredJoints.end(), jN) == ignoredJoints.end())
             {
-              auto jIndex = robot.jointIndexByName(jN);
-              if(mbc.q[jIndex].size() == 1)
+              if(robot.hasJoint(jN))
               {
-                qOut[i] = mbc.q[robot.jointIndexByName(jN)][0];
-              }
-              else
-              {
-                skipJoint = true;
+                auto jIndex = robot.jointIndexByName(jN);
+                if(mbc.q[jIndex].size() == 1)
+                {
+                  qOut[i] = mbc.q[robot.jointIndexByName(jN)][0];
+                }
+                else
+                {
+                  skipJoint = true;
+                }
               }
             }
+            else
+            {
+              skipJoint = true;
+            }
+            if(skipJoint)
+            {
+              qOut[i] = qInit[i];
+            }
           }
-          else
-          {
-            skipJoint = true;
-          }
-          if(skipJoint)
-          {
-            qOut[i] = qInit[i];
-          }
+          client.control().id = client.sensors().id;
+          client.send();
         }
-        // FIXME VERY DIRTY AND STRANGE...
-        client.control().id = client.sensors().id + 2;
-        client.send();
       }
+      prev_id = client.sensors().id;
+      tcp_run_dt = clock::now() - start;
     }
     else
     {

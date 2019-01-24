@@ -45,9 +45,9 @@ int main(int argc, char * argv[])
       {
         MC_NNG_WARNING("[dummy] Server control id " << server.control().id << " does not match sensors id " << server.sensors().id)
       }
-      std::cout << "control id: " << server.control().id << " command size: " << server.control().encoders.size() << "\n";
     }
     server.sensors().id += 1;
+    usleep(5000);
   }
   return 0;
 }

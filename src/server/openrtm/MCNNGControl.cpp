@@ -39,7 +39,7 @@ static const char* mccontrol_spec[] =
     "conf.default.timeStep", "0.005",
     "conf.default.is_enabled", "0",
     "conf.default.uri", "tcp://*:4444",
-    "conf.default.timeout", "4",
+    "conf.default.timeout", "5",
     ""
   };
 // </rtc-template>
@@ -50,7 +50,7 @@ MCNNGControl::MCNNGControl(RTC::Manager* manager)
     m_timeStep(0.005),
     m_enabled(false),
     uri("tcp://*:4444"),
-    timeout(4),
+    timeout(5),
     was_enabled(false),
     m_qInIn("qIn", m_qIn),
     m_rpyInIn("rpyIn", m_rpyIn),
@@ -93,7 +93,7 @@ RTC::ReturnCode_t MCNNGControl::onInitialize()
   bindParameter("timeStep", m_timeStep, "0.005");
   bindParameter("is_enabled", m_enabled, "0");
   bindParameter("uri", uri, "tcp://*:4444");
-  bindParameter("timeout", timeout, "4");
+  bindParameter("timeout", timeout, "5");
 
   MC_NNG_INFO("MCNNGControl::onInitialize() finished")
   return RTC::RTC_OK;
@@ -227,9 +227,9 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
       compute_end = std::chrono::system_clock::now();
       compute_time = compute_end - compute_start;
       double elapsed = compute_time.count() * 1000;
-      if(elapsed > 4.9)
+      if(elapsed > 5.1)
       {
-        MC_NNG_WARNING("Total time spent in MCNNGControl::onExecute (" << elapsed << ") exceeded 4.9ms")
+        MC_NNG_WARNING("Total time spent in MCNNGControl::onExecute (" << elapsed << ") exceeded 5.1ms")
       }
       m_qOut.tm = tm;
       m_qOutOut.write();

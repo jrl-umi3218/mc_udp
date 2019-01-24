@@ -17,6 +17,15 @@ bool Server::recv()
   int err = nng_recv(socket_, &buffer, &size, NNG_FLAG_ALLOC);
   if(err == 0)
   {
+    do
+    {
+      err = nng_recv(socket_, &buffer, &size, NNG_FLAG_ALLOC | NNG_FLAG_NONBLOCK);
+      if(err == 0)
+      {
+        MC_NNG_INFO("nng_recv got more data from the socket")
+      }
+    } while(err == 0);
+    err = 0;
     control_.fromBuffer(buffer);
     nng_free(buffer, size);
   }
@@ -26,6 +35,7 @@ bool Server::recv()
     {
       MC_NNG_WARNING("nng_recv failed: " << nng_strerror(err))
     }
+    nng_free(buffer, size);
   }
   return err == 0;
 }
