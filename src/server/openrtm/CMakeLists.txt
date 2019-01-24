@@ -1,8 +1,8 @@
 pkg_check_modules(HRPSYS_BASE hrpsys-base)
 
 if(${HRPSYS_BASE_FOUND})
-  option(BUILD_MCNNGControl "Build MCNNGControl" ON)
-  if(${BUILD_MCNNGControl})
+  option(BUILD_Server_OpenRTM "Build OpenRTM server component" ON)
+  if(${BUILD_Server_OpenRTM})
     set(MCNNGControl_lib_SRC
       MCNNGControl.cpp
       ${server_SRC}
