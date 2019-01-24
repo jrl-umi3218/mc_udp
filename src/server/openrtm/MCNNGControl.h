@@ -68,9 +68,9 @@ private:
   /** Data server */
   mc_nng::Server server_;
 
-  bool got_control_ = false;
-  bool control_lost_ = false;
-  uint64_t control_lost_iter_ = 0;
+  bool got_control_;
+  bool control_lost_;
+  uint64_t control_lost_iter_;
 };
 
 

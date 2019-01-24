@@ -62,7 +62,10 @@ MCNNGControl::MCNNGControl(RTC::Manager* manager)
     rhsensorIn("rhsensor", rhsensor),
     lhsensorIn("lhsensor", lhsensor),
     m_qOutOut("qOut", m_qOut),
-    server_()
+    server_(),
+    got_control_(false),
+    control_lost_(false),
+    control_lost_iter_(0)
     // </rtc-template>
 {
 }
@@ -117,24 +120,29 @@ RTC::ReturnCode_t MCNNGControl::onDeactivated(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
+namespace
+{
+
+void read_fsensor(const std::string & name, RTC::InPort<RTC::TimedDoubleSeq> & port, RTC::TimedDoubleSeq & data, mc_nng::Server & server_)
+{
+  if(port.isNew())
+  {
+    port.read();
+    if(data.data.length() == 6)
+    {
+      server_.sensors().fsensor(name, data.data.NP_data());
+    }
+  }
+}
+
+}
 
 RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
 {
-  auto read_fsensor = [this](const std::string & name, RTC::InPort<RTC::TimedDoubleSeq> & port, RTC::TimedDoubleSeq & data)
-  {
-    if(port.isNew())
-    {
-      port.read();
-      if(data.data.length() == 6)
-      {
-        server_.sensors().fsensor(name, data.data.NP_data());
-      }
-    }
-  };
-  read_fsensor("rfsensor", rfsensorIn, rfsensor);
-  read_fsensor("lfsensor", lfsensorIn, lfsensor);
-  read_fsensor("rhsensor", rhsensorIn, rhsensor);
-  read_fsensor("lhsensor", lhsensorIn, lhsensor);
+  read_fsensor("rfsensor", rfsensorIn, rfsensor, server_);
+  read_fsensor("lfsensor", lfsensorIn, lfsensor, server_);
+  read_fsensor("rhsensor", rhsensorIn, rhsensor, server_);
+  read_fsensor("lhsensor", lhsensorIn, lhsensor, server_);
   if(m_rpyInIn.isNew())
   {
     m_rpyInIn.read();
