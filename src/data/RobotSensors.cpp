@@ -62,8 +62,6 @@ void RobotSensors::toBuffer(uint8_t * buffer) const
 {
   size_t offset = 0;
   uint64_t tmp = 0; // temporary to store size
-  static_assert(sizeof(std::vector<double>::size_type) == sizeof(uint64_t), "Expect vector<double>::size() to return an unsigned integer of 64 bits");
-  static_assert(sizeof(std::string::size_type) == sizeof(uint64_t), "Expect std::string::size() to return an unsigned integer of 64 bits");
 
   memcpy_advance(buffer, &id, sizeof(uint64_t), offset);
 
