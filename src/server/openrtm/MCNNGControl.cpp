@@ -217,6 +217,13 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
         if(server_.control().id != server_.sensors().id)
         {
           MC_NNG_WARNING("[MCNNGControl] Using control from iteration " << server_.control().id << " when last sensors sent is from iteration " << server_.sensors().id)
+          if(server_.recv())
+          {
+            for(unsigned int i = 0; i < m_qOut.data.length(); ++i)
+            {
+              m_qOut.data[i] = server_.control().encoders[i];
+            }
+          }
         }
       }
       else
