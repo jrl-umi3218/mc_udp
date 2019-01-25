@@ -1,6 +1,7 @@
 #include <mc_nng/server/Server.h>
 #include <mc_nng/logging.h>
 
+#include <chrono>
 #include <unistd.h>
 
 int main(int argc, char * argv[])
@@ -40,7 +41,9 @@ int main(int argc, char * argv[])
   server.sensors().id = 0;
   while(1)
   {
+    auto start_t = std::chrono::system_clock::now();
     server.send();
+    auto send_t = std::chrono::system_clock::now();
     if(server.recv())
     {
       if(server.control().id != server.sensors().id)
@@ -48,8 +51,11 @@ int main(int argc, char * argv[])
         MC_NNG_WARNING("[dummy] Server control id " << server.control().id << " does not match sensors id " << server.sensors().id)
       }
     }
+    auto recv_t = std::chrono::system_clock::now();
+    std::chrono::duration<double> send_dt = send_t - start_t;
+    std::chrono::duration<double> recv_dt = recv_t - send_t;
+    std::cout << "send_dt: " << send_dt.count()*1000 << ", recv_dt: " << recv_dt.count() * 1000 << "\n";
     server.sensors().id += 1;
-    usleep(5000);
   }
   return 0;
 }
