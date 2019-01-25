@@ -39,12 +39,12 @@ protected:
   // Inputs
   RTC::TimedDoubleSeq m_qIn;
   RTC::InPort<RTC::TimedDoubleSeq> m_qInIn;
-  RTC::TimedOrientation3D m_rpyIn;
-  RTC::InPort<RTC::TimedOrientation3D> m_rpyInIn;
-  RTC::TimedAngularVelocity3D m_rateIn;
-  RTC::InPort<RTC::TimedAngularVelocity3D> m_rateInIn;
-  RTC::TimedAcceleration3D m_accIn;
-  RTC::InPort<RTC::TimedAcceleration3D> m_accInIn;
+  RTC::TimedDoubleSeq m_rpyIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_rpyInIn;
+  RTC::TimedDoubleSeq m_rateIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_rateInIn;
+  RTC::TimedDoubleSeq m_accIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_accInIn;
   RTC::TimedDoubleSeq m_taucIn;
   RTC::InPort<RTC::TimedDoubleSeq> m_taucInIn;
   RTC::TimedDoubleSeq rfsensor;

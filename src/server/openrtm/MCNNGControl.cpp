@@ -39,7 +39,7 @@ static const char* mccontrol_spec[] =
     "conf.default.timeStep", "0.005",
     "conf.default.is_enabled", "0",
     "conf.default.uri", "tcp://*:4444",
-    "conf.default.timeout", "5",
+    "conf.default.timeout", "4",
     ""
   };
 // </rtc-template>
@@ -50,7 +50,7 @@ MCNNGControl::MCNNGControl(RTC::Manager* manager)
     m_timeStep(0.005),
     m_enabled(false),
     uri("tcp://*:4444"),
-    timeout(5),
+    timeout(4),
     was_enabled(false),
     m_qInIn("qIn", m_qIn),
     m_rpyInIn("rpyIn", m_rpyIn),
@@ -96,7 +96,7 @@ RTC::ReturnCode_t MCNNGControl::onInitialize()
   bindParameter("timeStep", m_timeStep, "0.005");
   bindParameter("is_enabled", m_enabled, "0");
   bindParameter("uri", uri, "tcp://*:4444");
-  bindParameter("timeout", timeout, "5");
+  bindParameter("timeout", timeout, "4");
 
   MC_NNG_INFO("MCNNGControl::onInitialize() finished")
   return RTC::RTC_OK;
@@ -146,23 +146,23 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
   if(m_rpyInIn.isNew())
   {
     m_rpyInIn.read();
-    server_.sensors().orientation[0] = m_rpyIn.data.r;
-    server_.sensors().orientation[1] = m_rpyIn.data.p;
-    server_.sensors().orientation[2] = m_rpyIn.data.y;
+    server_.sensors().orientation[0] = m_rpyIn.data[0];
+    server_.sensors().orientation[1] = m_rpyIn.data[1];
+    server_.sensors().orientation[2] = m_rpyIn.data[2];
   }
   if(m_rateInIn.isNew())
   {
     m_rateInIn.read();
-    server_.sensors().angularVelocity[0] = m_rateIn.data.avx;
-    server_.sensors().angularVelocity[1] = m_rateIn.data.avy;
-    server_.sensors().angularVelocity[2] = m_rateIn.data.avz;
+    server_.sensors().angularVelocity[0] = m_rateIn.data[0];
+    server_.sensors().angularVelocity[1] = m_rateIn.data[1];
+    server_.sensors().angularVelocity[2] = m_rateIn.data[2];
   }
   if(m_accInIn.isNew())
   {
     m_accInIn.read();
-    server_.sensors().angularAcceleration[0] = m_accIn.data.ax;
-    server_.sensors().angularAcceleration[1] = m_accIn.data.ay;
-    server_.sensors().angularAcceleration[2] = m_accIn.data.az;
+    server_.sensors().angularAcceleration[0] = m_accIn.data[0];
+    server_.sensors().angularAcceleration[1] = m_accIn.data[1];
+    server_.sensors().angularAcceleration[2] = m_accIn.data[2];
   }
   if(m_taucInIn.isNew())
   {
