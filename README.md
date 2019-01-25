@@ -24,7 +24,15 @@ Usage
 $ MCControlNNG [config.conf]
 ```
 
-The default configuration file is ``~/.config/mc_rtc/mc_rtc.conf``.
+The default configuration file is ``~/.config/mc_rtc/mc_rtc.conf``. You should
+set up the robot hostname or URI in that file:
+
+```
+"NNG":
+{
+  "uri": "tcp://hrp4005c:4444"
+}
+```
 
 Server(s)
 ==
