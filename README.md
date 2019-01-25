@@ -17,6 +17,15 @@ Requirements
 
 - [mc\_rtc](https://gite.lirmm.fr/multi-contact/mc_rtc)
 
+Usage
+--
+
+```bash
+$ MCControlNNG [config.conf]
+```
+
+The default configuration file is ``~/.config/mc_rtc/mc_rtc.conf``.
+
 Server(s)
 ==
 
