@@ -1,90 +1,99 @@
 #include <mc_nng/server/Server.h>
+#include <mc_nng/data/Hello.h>
 
 #include <mc_nng/logging.h>
 
 #include <stdexcept>
 
+#include <string.h>
+#include <unistd.h>
+
 namespace mc_nng
 {
 
-Server::Server(const std::string & uri, int timeout)
+Server::Server(int port, int timeout)
+: recvData_(1024,0), sendData_(1024, 0)
 {
-  start(uri, timeout);
+  start(port, timeout);
+}
+
+Server::~Server()
+{
+  close(socket_);
 }
 
 bool Server::recv()
 {
-  uint8_t * buffer = NULL;
-  size_t size = 0;
-  int err = nng_recv(socket_, &buffer, &size, NNG_FLAG_ALLOC);
-  if(err == 0)
+  clientAddrLen_ = sizeof(client_);
+  int length = recvfrom(socket_, recvData_.data(), recvData_.size(), 0, (struct sockaddr*)&client_, &clientAddrLen_);
+  if(length > 0)
   {
-    do
+    if(length == sizeof(Hello) * sizeof(uint8_t))
     {
-      err = nng_recv(socket_, &buffer, &size, NNG_FLAG_ALLOC | NNG_FLAG_NONBLOCK);
-      if(err == 0)
-      {
-        MC_NNG_INFO("nng_recv got more data from the socket")
-      }
-    } while(err == 0);
-    err = 0;
-    control_.fromBuffer(buffer);
-    nng_free(buffer, size);
-  }
-  else
-  {
-    if(err != NNG_ETIMEDOUT)
-    {
-      MC_NNG_WARNING("nng_recv failed: " << nng_strerror(err))
+      MC_NNG_INFO("[UDP] New client sending data")
     }
-    nng_free(buffer, size);
+    else if(length >= static_cast<int>(recvData_.size()))
+    {
+      MC_NNG_WARNING("[UDP] Received exactly the buffer size, resizing for next round")
+      recvData_.resize(2*recvData_.size());
+    }
+    else
+    {
+      control_.fromBuffer(recvData_.data());
+      return true;
+    }
   }
-  return err == 0;
+  return false;
 }
 
 void Server::send()
 {
-  auto size = sensors_.size();
-  auto buffer = nng_alloc(size);
-  sensors_.toBuffer(reinterpret_cast<uint8_t*>(buffer));
-  int err = nng_send(socket_, buffer, size, NNG_FLAG_NONBLOCK | NNG_FLAG_ALLOC);
-  if(err != 0)
+  size_t sz = sensors_.size();
+  if(sz > sendData_.size())
   {
-    if(err != NNG_ETIMEDOUT)
-    {
-      MC_NNG_WARNING("nng_send failed: " << nng_strerror(err))
-    }
-    nng_free(buffer, size);
+    MC_NNG_WARNING("[UDP] Send data buffer is too small for required sending")
+    sendData_.resize(sz);
   }
+  sensors_.toBuffer(sendData_.data());
+  sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr*)&client_, clientAddrLen_);
 }
 
 void Server::stop()
 {
-  nng_close(socket_);
+  close(socket_);
 }
 
-void Server::restart(const std::string & uri, int timeout)
+void Server::restart(int port, int timeout)
 {
   stop();
-  start(uri, timeout);
+  start(port, timeout);
 }
 
-void Server::start(const std::string & uri, int timeout)
+void Server::start(int port, int timeout)
 {
-  int err = nng_pair0_open(&socket_);
-  if(err != 0)
+  timeout_ = timeout;
+  socket_ = socket(AF_INET, SOCK_DGRAM, 0);
+  if(socket_ < 0)
   {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to create socket: " << nng_strerror(err))
+    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to create socket: " << strerror(errno))
   }
-  err = nng_listen(socket_, uri.c_str(), NULL, 0);
-  if(err != 0)
+  sockaddr_in addr;
+  memset(&addr, 0, sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  addr.sin_port = htons(port);
+  int err = bind(socket_, (struct sockaddr*)&addr, sizeof(addr));
+  if(err < 0)
   {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to create listener: " << nng_strerror(err))
+    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed bind the socket: " << strerror(errno))
   }
-  err = nng_setopt_ms(socket_, NNG_OPT_RECVTIMEO, timeout);
-  if(err != 0)
+  timeval tv;
+  tv.tv_sec = 0;
+  tv.tv_usec = timeout_;
+  err = setsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+  if(err < 0)
   {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to set recv timeout: " << nng_strerror(err))
+    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to set recv timeout: " << strerror(errno))
   }
 }
 

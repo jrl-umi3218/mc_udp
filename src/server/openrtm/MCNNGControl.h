@@ -31,7 +31,7 @@ protected:
   // Configuration/Run
   double m_timeStep;
   bool m_enabled;
-  std::string uri;
+  int port;
   int timeout;
 
   bool was_enabled;

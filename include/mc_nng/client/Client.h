@@ -3,8 +3,9 @@
 #include <mc_nng/data/RobotControl.h>
 #include <mc_nng/data/RobotSensors.h>
 
-#include <nng/nng.h>
-#include <nng/protocol/pair0/pair.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 namespace mc_nng
 {
@@ -19,11 +20,13 @@ namespace mc_nng
 struct Client {
   /** Create the server
    *
-   * \param uri URI to bind to
+   * \param host Host to send messages to
+   *
+   * \param port Port to send messages to
    *
    * \param timeout Reception timeout
    */
-  Client(const std::string & uri, int timeout);
+  Client(const std::string & host, int port, int timeout);
 
   /** Receive sensors data
    *
@@ -45,7 +48,14 @@ struct Client {
 private:
   RobotControl control_;
   RobotSensors sensors_;
-  nng_socket socket_;
+  int socket_;
+  sockaddr_in server_;
+  std::vector<uint8_t> recvData_;
+  std::vector<uint8_t> sendData_;
+  sockaddr_in recvAddr_;
+  socklen_t recvAddrLen_;
+
+  void sendHello();
 };
 
 }

@@ -12,10 +12,11 @@ int main(int argc, char * argv[])
   }
   mc_control::MCGlobalController controller(conf_file);
   mc_rtc::Configuration config = controller.configuration().config("NNG", mc_rtc::Configuration{});
-  std::string uri = config("uri", std::string("tcp://localhost:4444"));
-  int timeout = config("timeout", 4);
-  LOG_INFO("Connecting NNG client to " << uri << " (timeout: " << timeout << ")")
-  mc_nng::Client client(uri, timeout);
+  std::string host = config("host", std::string("localhost"));
+  int port = config("port", 4444);
+  int timeout = config("timeout", 4000);
+  LOG_INFO("Connecting NNG client to " << host << ":" << port << " (timeout: " << timeout << ")")
+  mc_nng::Client client(host, port, timeout);
   bool init = false;
   // RTC port to robot force sensors
   std::unordered_map<std::string, std::string> fsensors;

@@ -38,8 +38,8 @@ static const char* mccontrol_spec[] =
     // Configuration variables
     "conf.default.timeStep", "0.005",
     "conf.default.is_enabled", "0",
-    "conf.default.uri", "tcp://*:4444",
-    "conf.default.timeout", "4",
+    "conf.default.port", "4444",
+    "conf.default.timeout", "3000",
     ""
   };
 // </rtc-template>
@@ -49,8 +49,8 @@ MCNNGControl::MCNNGControl(RTC::Manager* manager)
   : RTC::DataFlowComponentBase(manager),
     m_timeStep(0.005),
     m_enabled(false),
-    uri("tcp://*:4444"),
-    timeout(4),
+    port(4444),
+    timeout(3000),
     was_enabled(false),
     m_qInIn("qIn", m_qIn),
     m_rpyInIn("rpyIn", m_rpyIn),
@@ -95,8 +95,8 @@ RTC::ReturnCode_t MCNNGControl::onInitialize()
   // Bind variables and configuration variable
   bindParameter("timeStep", m_timeStep, "0.005");
   bindParameter("is_enabled", m_enabled, "0");
-  bindParameter("uri", uri, "tcp://*:4444");
-  bindParameter("timeout", timeout, "4");
+  bindParameter("port", port, "4444");
+  bindParameter("timeout", timeout, "3000");
 
   MC_NNG_INFO("MCNNGControl::onInitialize() finished")
   return RTC::RTC_OK;
@@ -105,8 +105,8 @@ RTC::ReturnCode_t MCNNGControl::onInitialize()
 RTC::ReturnCode_t MCNNGControl::onActivated(RTC::UniqueId ec_id)
 {
   MC_NNG_INFO("MCNNGControl::onActivated")
-  server_.restart(uri, timeout);
-  MC_NNG_SUCCESS("MCNNGControl started on " << uri << " (timeout: " << timeout << ")")
+  server_.restart(port, timeout);
+  MC_NNG_SUCCESS("MCNNGControl started on " << port << " (timeout: " << timeout << ")")
   return RTC::RTC_OK;
 }
 
@@ -216,7 +216,7 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
         }
         if(server_.control().id != server_.sensors().id)
         {
-          MC_NNG_WARNING("[MCNNGControl] Using control from iteration " << server_.control().id << " when last sensors sent is from iteration " << server_.sensors().id)
+          //MC_NNG_WARNING("[MCNNGControl] Using control from iteration " << server_.control().id << " when last sensors sent is from iteration " << server_.sensors().id)
           if(server_.recv())
           {
             for(unsigned int i = 0; i < m_qOut.data.length(); ++i)

@@ -3,17 +3,22 @@
 
 int main(int argc, char * argv[])
 {
-  std::string uri = "tcp://localhost:4444";
-  int timeout = 4;
+  std::string host = "localhost";
+  int port = 4444;
+  int timeout = 4000;
   if(argc > 1)
   {
-    uri = argv[1];
+    host = argv[1];
   }
   if(argc > 2)
   {
-    timeout = std::atoi(argv[2]);
+    port = std::atoi(argv[2]);
   }
-  mc_nng::Client client(uri, timeout);
+  if(argc > 3)
+  {
+    timeout = std::atoi(argv[3]);
+  }
+  mc_nng::Client client(host, port, timeout);
   auto & control = client.control();
   control.encoders = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
   uint64_t prev_id = 0;
