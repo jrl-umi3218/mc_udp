@@ -51,7 +51,7 @@ void Server::send()
   size_t sz = sensors_.size();
   if(sz > sendData_.size())
   {
-    MC_NNG_WARNING("[UDP] Send data buffer is too small for required sending")
+    MC_NNG_WARNING("[UDP] Send data buffer is too small for required sending (size: " << sendData_.size() << ", required: " << sz << ")")
     sendData_.resize(sz);
   }
   sensors_.toBuffer(sendData_.data());
