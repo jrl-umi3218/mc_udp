@@ -28,6 +28,9 @@ struct Client {
    */
   Client(const std::string & host, int port, int timeout);
 
+  /** Should be send when we are ready to receive more data after the first sensors */
+  void init();
+
   /** Receive sensors data
    *
    * Returns false if no data was received before timeout

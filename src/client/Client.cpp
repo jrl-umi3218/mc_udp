@@ -1,6 +1,7 @@
 #include <mc_udp/client/Client.h>
 
 #include <mc_udp/data/Hello.h>
+#include <mc_udp/data/Init.h>
 #include <mc_udp/logging.h>
 
 #include <stdexcept>
@@ -43,7 +44,7 @@ Client::Client(const std::string & host, int port, int timeout)
 
 bool Client::recv()
 {
-  int sz = recvfrom(socket_, recvData_.data(), recvData_.size(), 0, NULL, NULL);
+  int sz = recvfrom(socket_, recvData_.data(), recvData_.size(), MSG_DONTWAIT, NULL, NULL);
   if(sz >= static_cast<int>(recvData_.size()))
   {
     MC_UDP_WARNING("Receive buffer was too small to get it all")
@@ -52,6 +53,15 @@ bool Client::recv()
   else if(sz > 0)
   {
     sensors_.fromBuffer(recvData_.data());
+    do
+    {
+      sz = recvfrom(socket_, recvData_.data(), recvData_.size(), MSG_DONTWAIT, NULL, NULL);
+      if(sz > 0)
+      {
+        sensors_.fromBuffer(recvData_.data());
+        MC_UDP_INFO("Had more data waiting reception " << sensors_.id)
+      }
+    } while(sz > 0);
     return true;
   }
   return false;
@@ -60,6 +70,11 @@ bool Client::recv()
 void Client::sendHello()
 {
   sendto(socket_, &Hello, sizeof(Hello), 0, (struct sockaddr*)&server_, sizeof(server_));
+}
+
+void Client::init()
+{
+  sendto(socket_, &Init, sizeof(Init), 0, (struct sockaddr*)&server_, sizeof(server_));
 }
 
 void Client::send()

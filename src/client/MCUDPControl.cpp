@@ -64,10 +64,14 @@ int main(int argc, char * argv[])
       controller.setWrenches(wrenches);
       if(!init)
       {
+        auto init_start = clock::now();
         qInit = client.sensors().encoders;
         controller.init(qInit);
         controller.running = true;
         init = true;
+        auto init_end = clock::now();
+        duration_ms init_dt = init_end - init_start;
+        LOG_INFO("[MCUDPControl] Init duration " << init_dt.count())
       }
       else
       {

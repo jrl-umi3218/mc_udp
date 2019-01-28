@@ -67,6 +67,8 @@ private:
   std::vector<uint8_t> recvData_;
   std::vector<uint8_t> sendData_;
   void start(int port, int timeout_);
+  bool initClient_;
+  bool waitInit_;
 };
 
 }

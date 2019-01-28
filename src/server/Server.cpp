@@ -1,5 +1,6 @@
 #include <mc_udp/server/Server.h>
 #include <mc_udp/data/Hello.h>
+#include <mc_udp/data/Init.h>
 
 #include <mc_udp/logging.h>
 
@@ -12,12 +13,14 @@ namespace mc_udp
 {
 
 Server::Server()
-: recvData_(1024, 0), sendData_(1024,0)
+: recvData_(1024, 0), sendData_(1024,0),
+  initClient_(false), waitInit_(false)
 {
 }
 
 Server::Server(int port, int timeout)
-: recvData_(1024, 0), sendData_(1024,0)
+: recvData_(1024, 0), sendData_(1024,0),
+  initClient_(false), waitInit_(false)
 {
   start(port, timeout);
 }
@@ -36,6 +39,14 @@ bool Server::recv()
     if(length == sizeof(Hello) * sizeof(uint8_t))
     {
       MC_UDP_INFO("[UDP] New client sending data")
+      initClient_ = true;
+      waitInit_ = true;
+    }
+    else if(length == sizeof(Init) * sizeof(uint8_t))
+    {
+      MC_UDP_INFO("[UDP] Start streaming data to client")
+      sensors().id = 0;
+      initClient_ = false;
     }
     else if(length >= static_cast<int>(recvData_.size()))
     {
@@ -60,7 +71,11 @@ void Server::send()
     sendData_.resize(sz);
   }
   sensors_.toBuffer(sendData_.data());
-  sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr*)&client_, clientAddrLen_);
+  if((initClient_ && waitInit_) || !initClient_)
+  {
+    waitInit_ = false;
+    sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr*)&client_, clientAddrLen_);
+  }
 }
 
 void Server::stop()
