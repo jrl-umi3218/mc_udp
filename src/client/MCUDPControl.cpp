@@ -16,7 +16,8 @@ int main(int argc, char * argv[])
   int port = config("port", 4444);
   int timeout = config("timeout", 4000);
   LOG_INFO("Connecting UDP client to " << host << ":" << port << " (timeout: " << timeout << ")")
-  mc_udp::Client client(host, port, timeout);
+  mc_udp::Client sensorsClient(host, port, timeout);
+  mc_udp::Client controlClient(host, port + 1, timeout);
   bool init = false;
   // RTC port to robot force sensors
   std::unordered_map<std::string, std::string> fsensors;
@@ -41,21 +42,21 @@ int main(int argc, char * argv[])
   {
     using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
                                             std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
-    if(client.recv())
+    if(sensorsClient.recv())
     {
       auto start = clock::now();
-      controller.setEncoderValues(client.sensors().encoders);
-      controller.setJointTorques(client.sensors().torques);
+      controller.setEncoderValues(sensorsClient.sensors().encoders);
+      controller.setJointTorques(sensorsClient.sensors().torques);
       Eigen::Vector3d rpy;
-      rpy << client.sensors().orientation[0], client.sensors().orientation[1], client.sensors().orientation[2];
+      rpy << sensorsClient.sensors().orientation[0], sensorsClient.sensors().orientation[1], sensorsClient.sensors().orientation[2];
       controller.setSensorOrientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(rpy)));
       Eigen::Vector3d vel;
-      vel << client.sensors().angularVelocity[0], client.sensors().angularVelocity[1], client.sensors().angularVelocity[2];
+      vel << sensorsClient.sensors().angularVelocity[0], sensorsClient.sensors().angularVelocity[1], sensorsClient.sensors().angularVelocity[2];
       controller.setSensorAngularVelocity(vel);
       Eigen::Vector3d acc;
-      acc << client.sensors().angularAcceleration[0], client.sensors().angularAcceleration[1], client.sensors().angularAcceleration[2];
+      acc << sensorsClient.sensors().angularAcceleration[0], sensorsClient.sensors().angularAcceleration[1], sensorsClient.sensors().angularAcceleration[2];
       controller.setSensorAcceleration(acc);
-      for(const auto & fs : client.sensors().fsensors)
+      for(const auto & fs : sensorsClient.sensors().fsensors)
       {
         Eigen::Vector6d reading;
         reading << fs.reading[3], fs.reading[4], fs.reading[5], fs.reading[0], fs.reading[1], fs.reading[2];
@@ -65,26 +66,28 @@ int main(int argc, char * argv[])
       if(!init)
       {
         auto init_start = clock::now();
-        qInit = client.sensors().encoders;
+        qInit = sensorsClient.sensors().encoders;
         controller.init(qInit);
         controller.running = true;
         init = true;
         auto init_end = clock::now();
         duration_ms init_dt = init_end - init_start;
         LOG_INFO("[MCUDPControl] Init duration " << init_dt.count())
+        sensorsClient.init();
+        controlClient.init();
       }
       else
       {
-        if(prev_id + 1 != client.sensors().id)
+        if(prev_id + 1 != sensorsClient.sensors().id)
         {
-          LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: " << prev_id << ", current id: " << client.sensors().id << ")")
+          LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: " << prev_id << ", current id: " << sensorsClient.sensors().id << ")")
         }
         if(controller.run())
         {
           const auto & robot = controller.robot();
           const auto & mbc = robot.mbc();
           const auto & rjo = controller.ref_joint_order();
-          auto & qOut = client.control().encoders;
+          auto & qOut = sensorsClient.control().encoders;
           if(qOut.size() != rjo.size())
           {
             qOut.resize(rjo.size());
@@ -117,11 +120,11 @@ int main(int argc, char * argv[])
               qOut[i] = qInit[i];
             }
           }
-          client.control().id = client.sensors().id;
-          client.send();
+          controlClient.control().id = sensorsClient.sensors().id;
+          controlClient.send();
         }
       }
-      prev_id = client.sensors().id;
+      prev_id = sensorsClient.sensors().id;
       tcp_run_dt = clock::now() - start;
     }
   }

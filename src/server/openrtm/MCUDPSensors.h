@@ -13,11 +13,11 @@
 #include <chrono>
 #include <memory>
 
-class MCUDPControl  : public RTC::DataFlowComponentBase
+class MCUDPSensors  : public RTC::DataFlowComponentBase
 {
 public:
-  MCUDPControl(RTC::Manager* manager);
-  ~MCUDPControl();
+  MCUDPSensors(RTC::Manager* manager);
+  ~MCUDPSensors();
 
   virtual RTC::ReturnCode_t onInitialize();
 
@@ -36,10 +36,25 @@ protected:
 
   bool was_enabled;
 
-  // Outputs
-  RTC::TimedDoubleSeq m_qOut;
-  RTC::OutPort<RTC::TimedDoubleSeq> m_qOutOut;
-
+  // Inputs
+  RTC::TimedDoubleSeq m_qIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_qInIn;
+  RTC::TimedDoubleSeq m_rpyIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_rpyInIn;
+  RTC::TimedDoubleSeq m_rateIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_rateInIn;
+  RTC::TimedDoubleSeq m_accIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_accInIn;
+  RTC::TimedDoubleSeq m_taucIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_taucInIn;
+  RTC::TimedDoubleSeq rfsensor;
+  RTC::InPort<RTC::TimedDoubleSeq> rfsensorIn;
+  RTC::TimedDoubleSeq lfsensor;
+  RTC::InPort<RTC::TimedDoubleSeq> lfsensorIn;
+  RTC::TimedDoubleSeq rhsensor;
+  RTC::InPort<RTC::TimedDoubleSeq> rhsensorIn;
+  RTC::TimedDoubleSeq lhsensor;
+  RTC::InPort<RTC::TimedDoubleSeq> lhsensorIn;
 private:
   /* Measure execution time */
   std::chrono::time_point<std::chrono::system_clock> compute_start;
@@ -51,10 +66,13 @@ private:
   bool got_control_;
   bool control_lost_;
   uint64_t control_lost_iter_;
+
+  /** Log file */
+  std::ofstream log_;
 };
 
 
 extern "C"
 {
-  DLL_EXPORT void MCUDPControlInit(RTC::Manager* manager);
+  DLL_EXPORT void MCUDPSensorsInit(RTC::Manager* manager);
 }
