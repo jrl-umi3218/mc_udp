@@ -71,6 +71,9 @@ private:
   bool got_control_;
   bool control_lost_;
   uint64_t control_lost_iter_;
+
+  /** Log file */
+  std::ofstream log_;
 };
 
 

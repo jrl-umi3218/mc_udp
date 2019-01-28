@@ -106,6 +106,8 @@ RTC::ReturnCode_t MCUDPControl::onActivated(RTC::UniqueId ec_id)
 {
   MC_UDP_INFO("MCUDPControl::onActivated")
   server_.restart(port, timeout);
+  server_.sensors().id = 0;
+  log_.open("/tmp/udp.log");
   MC_UDP_SUCCESS("MCUDPControl started on " << port << " (timeout: " << timeout << ")")
   return RTC::RTC_OK;
 }
@@ -115,6 +117,7 @@ RTC::ReturnCode_t MCUDPControl::onDeactivated(RTC::UniqueId ec_id)
 {
   MC_UDP_INFO("MCUDPControl::onDeactivated")
   m_enabled = false;
+  log_.close();
   server_.stop();
   server_.sensors().id += 1;
   return RTC::RTC_OK;
@@ -203,6 +206,7 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
           MC_UDP_WARNING("[MCUDPControl] Command provided by control has the wrong size (expected: " << m_qIn.data.length() << ", got: " << server_.control().encoders.size() << ")")
           return RTC::RTC_OK;
         }
+        log_ << server_.sensors().id << ";" << server_.control().id << "\n";
         got_control_ = true;
         if(control_lost_)
         {
