@@ -25,7 +25,7 @@ Server::~Server()
 bool Server::recv()
 {
   clientAddrLen_ = sizeof(client_);
-  int length = recvfrom(socket_, recvData_.data(), recvData_.size(), 0, (struct sockaddr*)&client_, &clientAddrLen_);
+  int length = recvfrom(socket_, recvData_.data(), recvData_.size(), MSG_DONTWAIT, (struct sockaddr*)&client_, &clientAddrLen_);
   if(length > 0)
   {
     if(length == sizeof(Hello) * sizeof(uint8_t))
