@@ -21,7 +21,7 @@ struct Server {
    *
    * Serving must be started with restart
    */
-  Server() = default;
+  Server();
 
   /** Create the server
    *

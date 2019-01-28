@@ -11,8 +11,13 @@
 namespace mc_nng
 {
 
+Server::Server()
+: recvData_(1024, 0), sendData_(1024,0)
+{
+}
+
 Server::Server(int port, int timeout)
-: recvData_(1024,0), sendData_(1024, 0)
+: recvData_(1024, 0), sendData_(1024,0)
 {
   start(port, timeout);
 }
