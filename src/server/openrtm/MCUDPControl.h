@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mc_nng/server/Server.h>
+#include <mc_udp/server/Server.h>
 
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
@@ -13,11 +13,11 @@
 #include <chrono>
 #include <memory>
 
-class MCNNGControl  : public RTC::DataFlowComponentBase
+class MCUDPControl  : public RTC::DataFlowComponentBase
 {
 public:
-  MCNNGControl(RTC::Manager* manager);
-  ~MCNNGControl();
+  MCUDPControl(RTC::Manager* manager);
+  ~MCUDPControl();
 
   virtual RTC::ReturnCode_t onInitialize();
 
@@ -66,7 +66,7 @@ private:
   std::chrono::time_point<std::chrono::system_clock> compute_end;
   std::chrono::duration<double> compute_time;
   /** Data server */
-  mc_nng::Server server_;
+  mc_udp::Server server_;
 
   bool got_control_;
   bool control_lost_;
@@ -76,5 +76,5 @@ private:
 
 extern "C"
 {
-  DLL_EXPORT void MCNNGControlInit(RTC::Manager* manager);
+  DLL_EXPORT void MCUDPControlInit(RTC::Manager* manager);
 }

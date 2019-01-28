@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace mc_nng
+namespace mc_udp
 {
 
 /** Represent a force sensor reading */

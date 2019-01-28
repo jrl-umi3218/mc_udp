@@ -1,4 +1,4 @@
-set(include_DIR "${PROJECT_SOURCE_DIR}/include/mc_nng")
+set(include_DIR "${PROJECT_SOURCE_DIR}/include/mc_udp")
 
 set(data_SRC
   "${CMAKE_CURRENT_SOURCE_DIR}/data/RobotSensors.cpp"

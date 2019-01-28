@@ -14,16 +14,17 @@ find_package(mc_rtc)
 if(${mc_rtc_FOUND})
   option(BUILD_CLIENT "Build client" ON)
   if(${BUILD_CLIENT})
-    set(MCControlNNG_SRC
+    set(MCUDPControl_SRC
       ${client_SRC}
       ${client_HDR}
-      MCControlNNG.cpp
+      MCUDPControl.cpp
     )
-    add_executable(MCControlNNG ${MCControlNNG_SRC})
-    target_include_directories(MCControlNNG PRIVATE "${PROJECT_SOURCE_DIR}/include")
-    target_link_libraries(MCControlNNG mc_rtc::mc_control)
-
-    install(TARGETS MCControlNNG
+    set(TARGET_NAME "MCUDPControlClient")
+    add_executable(${TARGET_NAME} ${MCUDPControl_SRC})
+    target_include_directories(${TARGET_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/include")
+    target_link_libraries(${TARGET_NAME} mc_rtc::mc_control)
+    set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME MCUDPControl)
+    install(TARGETS ${TARGET_NAME}
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib
       ARCHIVE DESTINATION lib

@@ -1,7 +1,7 @@
-#include <mc_nng/client/Client.h>
+#include <mc_udp/client/Client.h>
 
-#include <mc_nng/data/Hello.h>
-#include <mc_nng/logging.h>
+#include <mc_udp/data/Hello.h>
+#include <mc_udp/logging.h>
 
 #include <stdexcept>
 
@@ -9,7 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
-namespace mc_nng
+namespace mc_udp
 {
 
 Client::Client(const std::string & host, int port, int timeout)
@@ -19,12 +19,12 @@ Client::Client(const std::string & host, int port, int timeout)
   socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if(socket_ < 0)
   {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to create socket: " << strerror(errno))
+    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed to create socket: " << strerror(errno))
   }
   auto hp = gethostbyname(host.c_str());
   if(!hp)
   {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Faile to resolve host (" << host << "): " << strerror(h_errno));
+    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Faile to resolve host (" << host << "): " << strerror(h_errno));
   }
   memset(&server_, 0, sizeof(server_));
   server_.sin_family = AF_INET;
@@ -36,7 +36,7 @@ Client::Client(const std::string & host, int port, int timeout)
   int err = setsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
   if(err < 0)
   {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to set recv timeout: " << strerror(errno))
+    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed to set recv timeout: " << strerror(errno))
   }
   sendHello();
 }
@@ -46,7 +46,7 @@ bool Client::recv()
   int sz = recvfrom(socket_, recvData_.data(), recvData_.size(), 0, NULL, NULL);
   if(sz >= static_cast<int>(recvData_.size()))
   {
-    MC_NNG_WARNING("Receive buffer was too small to get it all")
+    MC_UDP_WARNING("Receive buffer was too small to get it all")
     recvData_.resize(recvData_.size() * 2);
   }
   else if(sz > 0)
@@ -69,7 +69,7 @@ void Client::send()
   if(sz > sendData_.size())
   {
     sendData_.resize(2*sendData_.size());
-    MC_NNG_INFO("Needed to resize sending buffer")
+    MC_UDP_INFO("Needed to resize sending buffer")
   }
   control_.toBuffer(sendData_.data());
   sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr*)&server_, sizeof(server_));

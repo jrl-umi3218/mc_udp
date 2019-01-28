@@ -1,5 +1,5 @@
-#include <mc_nng/server/Server.h>
-#include <mc_nng/logging.h>
+#include <mc_udp/server/Server.h>
+#include <mc_udp/logging.h>
 
 #include <chrono>
 #include <unistd.h>
@@ -16,7 +16,7 @@ int main(int argc, char * argv[])
   {
     timeout = std::atoi(argv[2]);
   }
-  mc_nng::Server server(port, timeout);
+  mc_udp::Server server(port, timeout);
   auto & sensors = server.sensors();
   sensors.encoders = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   sensors.torques = {100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110};
@@ -48,7 +48,7 @@ int main(int argc, char * argv[])
     {
       if(server.control().id != server.sensors().id)
       {
-        MC_NNG_WARNING("[dummy] Server control id " << server.control().id << " does not match sensors id " << server.sensors().id)
+        MC_UDP_WARNING("[dummy] Server control id " << server.control().id << " does not match sensors id " << server.sensors().id)
       }
     }
     auto recv_t = std::chrono::system_clock::now();

@@ -1,8 +1,8 @@
-#include <mc_nng/data/RobotSensors.h>
+#include <mc_udp/data/RobotSensors.h>
 
 #include <cstring>
 
-namespace mc_nng
+namespace mc_udp
 {
 
 void RobotSensors::fsensor(const std::string & name, double data[6])

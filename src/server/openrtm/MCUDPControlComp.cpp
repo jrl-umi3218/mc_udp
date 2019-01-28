@@ -11,18 +11,18 @@
 #include <rtm/Manager.h>
 #include <iostream>
 #include <string>
-#include "MCNNGControl.h"
+#include "MCUDPControl.h"
 
 #include <signal.h>
 #include <stdlib.h>
 
 void MyModuleInit(RTC::Manager* manager)
 {
-  MCNNGControlInit(manager);
+  MCUDPControlInit(manager);
   RTC::RtcBase* comp;
 
   // Create a component
-  comp = manager->createComponent("MCNNGControl");
+  comp = manager->createComponent("MCUDPControl");
   std::cout << comp << std::endl;
 }
 

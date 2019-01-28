@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mc_nng/data/RobotControl.h>
-#include <mc_nng/data/RobotSensors.h>
+#include <mc_udp/data/RobotControl.h>
+#include <mc_udp/data/RobotSensors.h>
 
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-namespace mc_nng
+namespace mc_udp
 {
 
-/** Implement a simple NNG server of sending robot sensors' data and receiving
+/** Implement a simple UDP server of sending robot sensors' data and receiving
  * control data
  *
  *  Filling the sensors' data and making sure of the time-consistency of

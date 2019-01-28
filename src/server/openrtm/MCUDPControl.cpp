@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*!
- * @file  MCNNGControl.cpp * @brief Core component for MC control * $Date$
+ * @file  MCUDPControl.cpp * @brief Core component for MC control * $Date$
  *
  * $Id$
  */
@@ -13,9 +13,9 @@
 #pragma GCC diagnostic ignored "-Wdelete-incomplete"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #endif
-#include "MCNNGControl.h"
+#include "MCUDPControl.h"
 
-#include <mc_nng/logging.h>
+#include <mc_udp/logging.h>
 
 #include <fstream>
 #include <iomanip>
@@ -24,8 +24,8 @@
 // <rtc-template block="module_spec">
 static const char* mccontrol_spec[] =
   {
-    "implementation_id", "MCNNGControl",
-    "type_name",         "MCNNGControl",
+    "implementation_id", "MCUDPControl",
+    "type_name",         "MCUDPControl",
     "description",       "Core component for MC control",
     "version",           "0.1",
     "vendor",            "CNRS",
@@ -44,7 +44,7 @@ static const char* mccontrol_spec[] =
   };
 // </rtc-template>
 
-MCNNGControl::MCNNGControl(RTC::Manager* manager)
+MCUDPControl::MCUDPControl(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
     m_timeStep(0.005),
@@ -70,14 +70,14 @@ MCNNGControl::MCNNGControl(RTC::Manager* manager)
 {
 }
 
-MCNNGControl::~MCNNGControl()
+MCUDPControl::~MCUDPControl()
 {
 }
 
 
-RTC::ReturnCode_t MCNNGControl::onInitialize()
+RTC::ReturnCode_t MCUDPControl::onInitialize()
 {
-  MC_NNG_INFO("MCNNGControl::onInitialize() starting")
+  MC_UDP_INFO("MCUDPControl::onInitialize() starting")
   // Set InPort buffers
   addInPort("qIn", m_qInIn);
   addInPort("rpyIn", m_rpyInIn);
@@ -98,22 +98,22 @@ RTC::ReturnCode_t MCNNGControl::onInitialize()
   bindParameter("port", port, "4444");
   bindParameter("timeout", timeout, "3000");
 
-  MC_NNG_INFO("MCNNGControl::onInitialize() finished")
+  MC_UDP_INFO("MCUDPControl::onInitialize() finished")
   return RTC::RTC_OK;
 }
 
-RTC::ReturnCode_t MCNNGControl::onActivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t MCUDPControl::onActivated(RTC::UniqueId ec_id)
 {
-  MC_NNG_INFO("MCNNGControl::onActivated")
+  MC_UDP_INFO("MCUDPControl::onActivated")
   server_.restart(port, timeout);
-  MC_NNG_SUCCESS("MCNNGControl started on " << port << " (timeout: " << timeout << ")")
+  MC_UDP_SUCCESS("MCUDPControl started on " << port << " (timeout: " << timeout << ")")
   return RTC::RTC_OK;
 }
 
 
-RTC::ReturnCode_t MCNNGControl::onDeactivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t MCUDPControl::onDeactivated(RTC::UniqueId ec_id)
 {
-  MC_NNG_INFO("MCNNGControl::onDeactivated")
+  MC_UDP_INFO("MCUDPControl::onDeactivated")
   m_enabled = false;
   server_.stop();
   server_.sensors().id += 1;
@@ -123,7 +123,7 @@ RTC::ReturnCode_t MCNNGControl::onDeactivated(RTC::UniqueId ec_id)
 namespace
 {
 
-void read_fsensor(const std::string & name, RTC::InPort<RTC::TimedDoubleSeq> & port, RTC::TimedDoubleSeq & data, mc_nng::Server & server_)
+void read_fsensor(const std::string & name, RTC::InPort<RTC::TimedDoubleSeq> & port, RTC::TimedDoubleSeq & data, mc_udp::Server & server_)
 {
   if(port.isNew())
   {
@@ -137,7 +137,7 @@ void read_fsensor(const std::string & name, RTC::InPort<RTC::TimedDoubleSeq> & p
 
 }
 
-RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
+RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
 {
   read_fsensor("rfsensor", rfsensorIn, rfsensor, server_);
   read_fsensor("lfsensor", lfsensorIn, lfsensor, server_);
@@ -200,13 +200,13 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
       {
         if(server_.control().encoders.size() != m_qIn.data.length())
         {
-          MC_NNG_WARNING("[MCNNGControl] Command provided by control has the wrong size (expected: " << m_qIn.data.length() << ", got: " << server_.control().encoders.size() << ")")
+          MC_UDP_WARNING("[MCUDPControl] Command provided by control has the wrong size (expected: " << m_qIn.data.length() << ", got: " << server_.control().encoders.size() << ")")
           return RTC::RTC_OK;
         }
         got_control_ = true;
         if(control_lost_)
         {
-          MC_NNG_WARNING("Control was lost for " << control_lost_iter_ << " iteration(s)")
+          MC_UDP_WARNING("Control was lost for " << control_lost_iter_ << " iteration(s)")
           control_lost_iter_ = 0;
         }
         control_lost_ = false;
@@ -219,7 +219,7 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
       {
         if(got_control_ && !control_lost_)
         {
-          MC_NNG_ERROR("[MCNNGControl] Didn't receive an answer before timeout, writing previous qOut as control")
+          MC_UDP_ERROR("[MCUDPControl] Didn't receive an answer before timeout, writing previous qOut as control")
           control_lost_ = true;
           got_control_ = false;
         }
@@ -233,7 +233,7 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
       double elapsed = compute_time.count() * 1000;
       if(elapsed > 5.1)
       {
-        MC_NNG_WARNING("Total time spent in MCNNGControl::onExecute (" << elapsed << ") exceeded 5.1ms")
+        MC_UDP_WARNING("Total time spent in MCUDPControl::onExecute (" << elapsed << ") exceeded 5.1ms")
       }
       m_qOut.tm = tm;
       m_qOutOut.write();
@@ -250,12 +250,12 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
 extern "C"
 {
 
-  void MCNNGControlInit(RTC::Manager* manager)
+  void MCUDPControlInit(RTC::Manager* manager)
   {
     coil::Properties profile(mccontrol_spec);
     manager->registerFactory(profile,
-                             RTC::Create<MCNNGControl>,
-                             RTC::Delete<MCNNGControl>);
+                             RTC::Create<MCUDPControl>,
+                             RTC::Delete<MCUDPControl>);
   }
 
 };

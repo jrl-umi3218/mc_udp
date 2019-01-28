@@ -1,5 +1,5 @@
-#include <mc_nng/client/Client.h>
-#include <mc_nng/logging.h>
+#include <mc_udp/client/Client.h>
+#include <mc_udp/logging.h>
 
 int main(int argc, char * argv[])
 {
@@ -18,7 +18,7 @@ int main(int argc, char * argv[])
   {
     timeout = std::atoi(argv[3]);
   }
-  mc_nng::Client client(host, port, timeout);
+  mc_udp::Client client(host, port, timeout);
   auto & control = client.control();
   control.encoders = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
   uint64_t prev_id = 0;
@@ -28,7 +28,7 @@ int main(int argc, char * argv[])
     {
       if(client.sensors().id != prev_id + 1)
       {
-        MC_NNG_WARNING("[dummy] Missed one frame of sensors data (id: " << client.sensors().id << ", previous id: " << prev_id << ")")
+        MC_UDP_WARNING("[dummy] Missed one frame of sensors data (id: " << client.sensors().id << ", previous id: " << prev_id << ")")
       }
       control.id = client.sensors().id;
       prev_id = control.id;

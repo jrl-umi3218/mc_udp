@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace mc_nng
+namespace mc_udp
 {
 
 /** Robot control data sent to the server */

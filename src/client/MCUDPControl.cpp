@@ -1,4 +1,4 @@
-#include <mc_nng/client/Client.h>
+#include <mc_udp/client/Client.h>
 
 #include <mc_control/mc_global_controller.h>
 #include <mc_rbdyn/rpy_utils.h>
@@ -11,12 +11,12 @@ int main(int argc, char * argv[])
     conf_file = argv[1];
   }
   mc_control::MCGlobalController controller(conf_file);
-  mc_rtc::Configuration config = controller.configuration().config("NNG", mc_rtc::Configuration{});
+  mc_rtc::Configuration config = controller.configuration().config("UDP", mc_rtc::Configuration{});
   std::string host = config("host", std::string("localhost"));
   int port = config("port", 4444);
   int timeout = config("timeout", 4000);
-  LOG_INFO("Connecting NNG client to " << host << ":" << port << " (timeout: " << timeout << ")")
-  mc_nng::Client client(host, port, timeout);
+  LOG_INFO("Connecting UDP client to " << host << ":" << port << " (timeout: " << timeout << ")")
+  mc_udp::Client client(host, port, timeout);
   bool init = false;
   // RTC port to robot force sensors
   std::unordered_map<std::string, std::string> fsensors;
@@ -73,7 +73,7 @@ int main(int argc, char * argv[])
       {
         if(prev_id + 1 != client.sensors().id)
         {
-          LOG_WARNING("[MCControlNNG] Missed one or more sensors reading (previous id: " << prev_id << ", current id: " << client.sensors().id << ")")
+          LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: " << prev_id << ", current id: " << client.sensors().id << ")")
         }
         if(controller.run())
         {
@@ -122,7 +122,7 @@ int main(int argc, char * argv[])
     }
     else
     {
-      LOG_WARNING("[MCControlNNG] Failed to received sensors data within the timeout")
+      LOG_WARNING("[MCUDPControl] Failed to received sensors data within the timeout")
     }
   }
   return 0;
