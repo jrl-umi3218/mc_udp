@@ -145,23 +145,41 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
   if(m_rpyInIn.isNew())
   {
     m_rpyInIn.read();
+#ifdef MC_UDP_OPENRTM_LEGACY
     server_.sensors().orientation[0] = m_rpyIn.data[0];
     server_.sensors().orientation[1] = m_rpyIn.data[1];
     server_.sensors().orientation[2] = m_rpyIn.data[2];
+#else
+    server_.sensors().orientation[0] = m_rpyIn.data.r;
+    server_.sensors().orientation[1] = m_rpyIn.data.p;
+    server_.sensors().orientation[2] = m_rpyIn.data.y;
+#endif
   }
   if(m_rateInIn.isNew())
   {
     m_rateInIn.read();
+#ifdef MC_UDP_OPENRTM_LEGACY
     server_.sensors().angularVelocity[0] = m_rateIn.data[0];
     server_.sensors().angularVelocity[1] = m_rateIn.data[1];
     server_.sensors().angularVelocity[2] = m_rateIn.data[2];
+#else
+    server_.sensors().angularVelocity[0] = m_rateIn.data.avx;
+    server_.sensors().angularVelocity[1] = m_rateIn.data.avy;
+    server_.sensors().angularVelocity[2] = m_rateIn.data.avz;
+#endif
   }
   if(m_accInIn.isNew())
   {
     m_accInIn.read();
+#ifdef MC_UDP_OPENRTM_LEGACY
     server_.sensors().angularAcceleration[0] = m_accIn.data[0];
     server_.sensors().angularAcceleration[1] = m_accIn.data[1];
     server_.sensors().angularAcceleration[2] = m_accIn.data[2];
+#else
+    server_.sensors().angularAcceleration[0] = m_accIn.data.ax;
+    server_.sensors().angularAcceleration[1] = m_accIn.data.ay;
+    server_.sensors().angularAcceleration[2] = m_accIn.data.az;
+#endif
   }
   if(m_taucInIn.isNew())
   {
