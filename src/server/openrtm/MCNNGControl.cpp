@@ -196,7 +196,6 @@ RTC::ReturnCode_t MCNNGControl::onExecute(RTC::UniqueId ec_id)
     {
       compute_start = std::chrono::system_clock::now();
       server_.send();
-      usleep(2500);
       if(server_.recv())
       {
         if(server_.control().encoders.size() != m_qIn.data.length())
