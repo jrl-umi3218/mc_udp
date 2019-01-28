@@ -15,8 +15,9 @@ int main(int argc, char * argv[])
   std::string host = config("host", std::string("localhost"));
   int port = config("port", 4444);
   int timeout = config("timeout", 4000);
-  LOG_INFO("Connecting UDP client to " << host << ":" << port << " (timeout: " << timeout << ")")
+  LOG_INFO("Connecting UDP sensors client to " << host << ":" << port << " (timeout: " << timeout << ")")
   mc_udp::Client sensorsClient(host, port, timeout);
+  LOG_INFO("Connecting UDP control client to " << host << ":" << port + 1 << " (timeout: " << timeout << ")")
   mc_udp::Client controlClient(host, port + 1, timeout);
   bool init = false;
   // RTC port to robot force sensors
@@ -87,7 +88,7 @@ int main(int argc, char * argv[])
           const auto & robot = controller.robot();
           const auto & mbc = robot.mbc();
           const auto & rjo = controller.ref_joint_order();
-          auto & qOut = sensorsClient.control().encoders;
+          auto & qOut = controlClient.control().encoders;
           if(qOut.size() != rjo.size())
           {
             qOut.resize(rjo.size());

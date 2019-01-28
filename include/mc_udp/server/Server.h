@@ -69,6 +69,7 @@ private:
   void start(int port, int timeout_);
   bool initClient_;
   bool waitInit_;
+  std::string id_;
 };
 
 }

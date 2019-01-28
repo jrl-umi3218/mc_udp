@@ -61,10 +61,7 @@ MCUDPSensors::MCUDPSensors(RTC::Manager* manager)
     lfsensorIn("lfsensor", lfsensor),
     rhsensorIn("rhsensor", rhsensor),
     lhsensorIn("lhsensor", lhsensor),
-    server_(),
-    got_control_(false),
-    control_lost_(false),
-    control_lost_iter_(0)
+    server_()
     // </rtc-template>
 {
 }
@@ -103,7 +100,6 @@ RTC::ReturnCode_t MCUDPSensors::onActivated(RTC::UniqueId ec_id)
   MC_UDP_INFO("MCUDPSensors::onActivated")
   server_.restart(port, timeout);
   server_.sensors().id = 0;
-  log_.open("/tmp/udp.log");
   MC_UDP_SUCCESS("MCUDPSensors started on " << port << " (timeout: " << timeout << ")")
   return RTC::RTC_OK;
 }
@@ -113,7 +109,6 @@ RTC::ReturnCode_t MCUDPSensors::onDeactivated(RTC::UniqueId ec_id)
 {
   MC_UDP_INFO("MCUDPSensors::onDeactivated")
   m_enabled = false;
-  log_.close();
   server_.stop();
   server_.sensors().id += 1;
   return RTC::RTC_OK;
@@ -211,6 +206,7 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
     if(m_enabled)
     {
       compute_start = std::chrono::system_clock::now();
+      server_.recv();
       server_.send();
       compute_end = std::chrono::system_clock::now();
       compute_time = compute_end - compute_start;

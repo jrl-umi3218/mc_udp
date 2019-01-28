@@ -13,7 +13,8 @@ namespace mc_udp
 {
 
 Server::Server()
-: recvData_(1024, 0), sendData_(1024,0),
+: socket_(0),
+  recvData_(1024, 0), sendData_(1024,0),
   initClient_(false), waitInit_(false)
 {
 }
@@ -27,30 +28,29 @@ Server::Server(int port, int timeout)
 
 Server::~Server()
 {
-  close(socket_);
+  stop();
 }
 
 bool Server::recv()
 {
-  clientAddrLen_ = sizeof(client_);
   int length = recvfrom(socket_, recvData_.data(), recvData_.size(), MSG_DONTWAIT, (struct sockaddr*)&client_, &clientAddrLen_);
   if(length > 0)
   {
     if(length == sizeof(Hello) * sizeof(uint8_t))
     {
-      MC_UDP_INFO("[UDP] New client sending data")
+      MC_UDP_INFO(id_ << " New client sending data")
       initClient_ = true;
       waitInit_ = true;
     }
     else if(length == sizeof(Init) * sizeof(uint8_t))
     {
-      MC_UDP_INFO("[UDP] Start streaming data to client")
+      MC_UDP_INFO(id_ << " Start streaming data to client")
       sensors().id = 0;
       initClient_ = false;
     }
     else if(length >= static_cast<int>(recvData_.size()))
     {
-      MC_UDP_WARNING("[UDP] Received exactly the buffer size, resizing for next round")
+      MC_UDP_WARNING(id_ << " Received exactly the buffer size, resizing for next round")
       recvData_.resize(2*recvData_.size());
     }
     else
@@ -67,7 +67,7 @@ void Server::send()
   size_t sz = sensors_.size();
   if(sz > sendData_.size())
   {
-    MC_UDP_WARNING("[UDP] Send data buffer is too small for required sending (size: " << sendData_.size() << ", required: " << sz << ")")
+    MC_UDP_WARNING(id_ << " Send data buffer is too small for required sending (size: " << sendData_.size() << ", required: " << sz << ")")
     sendData_.resize(sz);
   }
   sensors_.toBuffer(sendData_.data());
@@ -80,7 +80,10 @@ void Server::send()
 
 void Server::stop()
 {
-  close(socket_);
+  if(socket_ != 0)
+  {
+    close(socket_);
+  }
 }
 
 void Server::restart(int port, int timeout)
@@ -92,6 +95,9 @@ void Server::restart(int port, int timeout)
 void Server::start(int port, int timeout)
 {
   timeout_ = timeout;
+  std::stringstream ss;
+  ss << "[UDP::" << port << "]";
+  id_ = ss.str();
   socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if(socket_ < 0)
   {
@@ -115,6 +121,7 @@ void Server::start(int port, int timeout)
   {
     MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed to set recv timeout: " << strerror(errno))
   }
+  clientAddrLen_ = sizeof(client_);
 }
 
 }

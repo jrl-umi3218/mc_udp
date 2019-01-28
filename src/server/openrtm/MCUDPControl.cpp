@@ -123,6 +123,8 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
       {
         m_qOut.data[i] = server_.control().encoders[i];
       }
+      m_qOut.tm = tm;
+      m_qOutOut.write();
     }
     else
     {
@@ -144,9 +146,6 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
     {
       MC_UDP_WARNING("Total time spent in MCUDPControl::onExecute (" << elapsed << ") exceeded 5.1ms")
     }
-    m_qOut.tm = tm;
-    m_qOutOut.write();
-    server_.sensors().id += 1;
   }
   return RTC::RTC_OK;
 }
