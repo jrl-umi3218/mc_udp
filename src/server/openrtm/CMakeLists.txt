@@ -14,7 +14,7 @@ if(${HRPSYS_BASE_FOUND})
     link_directories(MCNNGControl ${HRPSYS_BASE_LIBRARY_DIRS})
     add_library(MCNNGControl SHARED ${MCNNGControl_lib_SRC} ${MCNNGControl_lib_HDR})
     target_include_directories(MCNNGControl PUBLIC ${HRPSYS_BASE_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
-    target_link_libraries(MCNNGControl nng ${HRPSYS_BASE_LIBRARIES})
+    target_link_libraries(MCNNGControl ${HRPSYS_BASE_LIBRARIES})
     set_target_properties(MCNNGControl PROPERTIES PREFIX "")
 
     add_executable(MCNNGControlComp MCNNGControlComp.cpp)

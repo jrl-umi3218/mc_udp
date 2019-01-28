@@ -21,7 +21,7 @@ if(${mc_rtc_FOUND})
     )
     add_executable(MCControlNNG ${MCControlNNG_SRC})
     target_include_directories(MCControlNNG PRIVATE "${PROJECT_SOURCE_DIR}/include")
-    target_link_libraries(MCControlNNG mc_rtc::mc_control nng)
+    target_link_libraries(MCControlNNG mc_rtc::mc_control)
 
     install(TARGETS MCControlNNG
       RUNTIME DESTINATION bin
