@@ -60,9 +60,9 @@ struct Server {
 private:
   RobotControl control_;
   RobotSensors sensors_;
-  int socket_ = 0;
+  int socket_;
   sockaddr_in client_;
-  socklen_t clientAddrLen_ = 0;
+  socklen_t clientAddrLen_;
   int timeout_;
   std::vector<uint8_t> recvData_;
   std::vector<uint8_t> sendData_;
