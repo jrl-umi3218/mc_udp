@@ -120,10 +120,6 @@ int main(int argc, char * argv[])
       prev_id = client.sensors().id;
       tcp_run_dt = clock::now() - start;
     }
-    else
-    {
-      LOG_WARNING("[MCUDPControl] Failed to received sensors data within the timeout")
-    }
   }
   return 0;
 }
