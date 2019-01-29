@@ -7,16 +7,11 @@
 int main(int argc, char * argv[])
 {
   int port = 4444;
-  int timeout = 4000;
   if(argc > 1)
   {
     port = std::atoi(argv[1]);
   }
-  if(argc > 2)
-  {
-    timeout = std::atoi(argv[2]);
-  }
-  mc_udp::Server server(port, timeout);
+  mc_udp::Server server(port);
   auto & sensors = server.sensors();
   sensors.encoders = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   sensors.torques = {100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110};

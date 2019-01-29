@@ -19,11 +19,11 @@ Server::Server()
 {
 }
 
-Server::Server(int port, int timeout)
+Server::Server(int port)
 : recvData_(1024, 0), sendData_(1024,0),
   initClient_(false), waitInit_(false)
 {
-  start(port, timeout);
+  start(port);
 }
 
 Server::~Server()
@@ -86,15 +86,14 @@ void Server::stop()
   }
 }
 
-void Server::restart(int port, int timeout)
+void Server::restart(int port)
 {
   stop();
-  start(port, timeout);
+  start(port);
 }
 
-void Server::start(int port, int timeout)
+void Server::start(int port)
 {
-  timeout_ = timeout;
   std::stringstream ss;
   ss << "[UDP::" << port << "]";
   id_ = ss.str();
@@ -112,14 +111,6 @@ void Server::start(int port, int timeout)
   if(err < 0)
   {
     MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed bind the socket: " << strerror(errno))
-  }
-  timeval tv;
-  tv.tv_sec = 0;
-  tv.tv_usec = timeout_;
-  err = setsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-  if(err < 0)
-  {
-    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed to set recv timeout: " << strerror(errno))
   }
   clientAddrLen_ = sizeof(client_);
 }

@@ -23,17 +23,15 @@ struct Client {
    * \param host Host to send messages to
    *
    * \param port Port to send messages to
-   *
-   * \param timeout Reception timeout
    */
-  Client(const std::string & host, int port, int timeout);
+  Client(const std::string & host, int port);
 
   /** Should be send when we are ready to receive more data after the first sensors */
   void init();
 
   /** Receive sensors data
    *
-   * Returns false if no data was received before timeout
+   * Returns false if no data was received
    *
    * The server does not take care of checking sensor/control consistency
    */

@@ -39,7 +39,6 @@ static const char* mccontrol_spec[] =
     "conf.default.timeStep", "0.005",
     "conf.default.is_enabled", "0",
     "conf.default.port", "4445",
-    "conf.default.timeout", "3000",
     ""
   };
 // </rtc-template>
@@ -50,8 +49,6 @@ MCUDPControl::MCUDPControl(RTC::Manager* manager)
     m_timeStep(0.005),
     m_enabled(false),
     port(4445),
-    timeout(3000),
-    was_enabled(false),
     m_qOutOut("qOut", m_qOut),
     server_(),
     got_control_(false),
@@ -76,7 +73,6 @@ RTC::ReturnCode_t MCUDPControl::onInitialize()
   bindParameter("timeStep", m_timeStep, "0.005");
   bindParameter("is_enabled", m_enabled, "0");
   bindParameter("port", port, "4445");
-  bindParameter("timeout", timeout, "3000");
 
   MC_UDP_INFO("MCUDPControl::onInitialize() finished")
   return RTC::RTC_OK;
@@ -85,8 +81,8 @@ RTC::ReturnCode_t MCUDPControl::onInitialize()
 RTC::ReturnCode_t MCUDPControl::onActivated(RTC::UniqueId ec_id)
 {
   MC_UDP_INFO("MCUDPControl::onActivated")
-  server_.restart(port, timeout);
-  MC_UDP_SUCCESS("MCUDPControl started on " << port << " (timeout: " << timeout << ")")
+  server_.restart(port);
+  MC_UDP_SUCCESS("MCUDPControl started on " << port)
   return RTC::RTC_OK;
 }
 
@@ -130,7 +126,7 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
     {
       if(got_control_ && !control_lost_)
       {
-        MC_UDP_ERROR("[MCUDPControl] Didn't receive an answer before timeout, writing previous qOut as control")
+        MC_UDP_ERROR("[MCUDPControl] Didn't receive new control, writing previous qOut as control")
         control_lost_ = true;
         got_control_ = false;
       }

@@ -32,9 +32,6 @@ protected:
   double m_timeStep;
   bool m_enabled;
   int port;
-  int timeout;
-
-  bool was_enabled;
 
   // Outputs
   RTC::TimedDoubleSeq m_qOut;

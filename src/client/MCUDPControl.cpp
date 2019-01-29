@@ -14,11 +14,10 @@ int main(int argc, char * argv[])
   mc_rtc::Configuration config = controller.configuration().config("UDP", mc_rtc::Configuration{});
   std::string host = config("host", std::string("localhost"));
   int port = config("port", 4444);
-  int timeout = config("timeout", 4000);
-  LOG_INFO("Connecting UDP sensors client to " << host << ":" << port << " (timeout: " << timeout << ")")
-  mc_udp::Client sensorsClient(host, port, timeout);
-  LOG_INFO("Connecting UDP control client to " << host << ":" << port + 1 << " (timeout: " << timeout << ")")
-  mc_udp::Client controlClient(host, port + 1, timeout);
+  LOG_INFO("Connecting UDP sensors client to " << host << ":" << port)
+  mc_udp::Client sensorsClient(host, port);
+  LOG_INFO("Connecting UDP control client to " << host << ":" << port + 1)
+  mc_udp::Client controlClient(host, port + 1);
   bool init = false;
   // RTC port to robot force sensors
   std::unordered_map<std::string, std::string> fsensors;

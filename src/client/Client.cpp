@@ -13,7 +13,7 @@
 namespace mc_udp
 {
 
-Client::Client(const std::string & host, int port, int timeout)
+Client::Client(const std::string & host, int port)
 : recvData_(1024, 0),
   sendData_(1024, 0)
 {
@@ -31,14 +31,6 @@ Client::Client(const std::string & host, int port, int timeout)
   server_.sin_family = AF_INET;
   server_.sin_port = htons(port);
   memcpy(&server_.sin_addr, hp->h_addr_list[0], hp->h_length);
-  timeval tv;
-  tv.tv_sec = 0;
-  tv.tv_usec = timeout;
-  int err = setsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-  if(err < 0)
-  {
-    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed to set recv timeout: " << strerror(errno))
-  }
   sendHello();
 }
 

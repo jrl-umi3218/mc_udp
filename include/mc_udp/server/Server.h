@@ -26,17 +26,15 @@ struct Server {
   /** Create the server
    *
    * \param uri URI to bind to
-   *
-   * \param timeout Reception timeout (microseconds)
    */
-  Server(int port, int timeout);
+  Server(int port);
 
   /** Destructor */
   ~Server();
 
   /** Receive control data
    *
-   * Returns false if no data was received before timeout
+   * Returns false if no data was received.
    *
    * The server does not take care of checking sensor/control consistency
    */
@@ -56,17 +54,16 @@ struct Server {
   void stop();
 
   /** Restart server */
-  void restart(int port, int timeout);
+  void restart(int port);
 private:
   RobotControl control_;
   RobotSensors sensors_;
   int socket_;
   sockaddr_in client_;
   socklen_t clientAddrLen_;
-  int timeout_;
   std::vector<uint8_t> recvData_;
   std::vector<uint8_t> sendData_;
-  void start(int port, int timeout_);
+  void start(int port);
   bool initClient_;
   bool waitInit_;
   std::string id_;

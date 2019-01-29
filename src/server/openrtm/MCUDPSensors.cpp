@@ -39,7 +39,6 @@ static const char* mccontrol_spec[] =
     "conf.default.timeStep", "0.005",
     "conf.default.is_enabled", "0",
     "conf.default.port", "4444",
-    "conf.default.timeout", "3000",
     ""
   };
 // </rtc-template>
@@ -50,8 +49,6 @@ MCUDPSensors::MCUDPSensors(RTC::Manager* manager)
     m_timeStep(0.005),
     m_enabled(false),
     port(4444),
-    timeout(3000),
-    was_enabled(false),
     m_qInIn("qIn", m_qIn),
     m_rpyInIn("rpyIn", m_rpyIn),
     m_rateInIn("rateIn", m_rateIn),
@@ -89,7 +86,6 @@ RTC::ReturnCode_t MCUDPSensors::onInitialize()
   bindParameter("timeStep", m_timeStep, "0.005");
   bindParameter("is_enabled", m_enabled, "0");
   bindParameter("port", port, "4444");
-  bindParameter("timeout", timeout, "3000");
 
   MC_UDP_INFO("MCUDPSensors::onInitialize() finished")
   return RTC::RTC_OK;
@@ -98,9 +94,9 @@ RTC::ReturnCode_t MCUDPSensors::onInitialize()
 RTC::ReturnCode_t MCUDPSensors::onActivated(RTC::UniqueId ec_id)
 {
   MC_UDP_INFO("MCUDPSensors::onActivated")
-  server_.restart(port, timeout);
+  server_.restart(port);
   server_.sensors().id = 0;
-  MC_UDP_SUCCESS("MCUDPSensors started on " << port << " (timeout: " << timeout << ")")
+  MC_UDP_SUCCESS("MCUDPSensors started on " << port)
   return RTC::RTC_OK;
 }
 
