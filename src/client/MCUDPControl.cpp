@@ -3,17 +3,43 @@
 #include <mc_control/mc_global_controller.h>
 #include <mc_rbdyn/rpy_utils.h>
 
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
+
 int main(int argc, char * argv[])
 {
   std::string conf_file = "";
-  if(argc > 1)
+  std::string host = "";
+  int port = 4444;
+
+  po::options_description desc("MCControlTCP options");
+  desc.add_options()
+    ("help", "Display help message")
+    ("host,h", po::value<std::string>(&host), "Connection host")
+    ("port,p", po::value<int>(&port), "Connection port")
+    ("conf,f", po::value<std::string>(&conf_file), "Configuration file");
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if(vm.count("help"))
   {
-    conf_file = argv[1];
+    std::cout << desc << std::endl;
+    return 1;
   }
+
   mc_control::MCGlobalController controller(conf_file);
   mc_rtc::Configuration config = controller.configuration().config("UDP", mc_rtc::Configuration{});
-  std::string host = config("host", std::string("localhost"));
-  int port = config("port", 4444);
+  if(!vm.count("host"))
+  {
+    config("host", host);
+  }
+  if(!vm.count("port"))
+  {
+    config("port", port);
+  }
   LOG_INFO("Connecting UDP sensors client to " << host << ":" << port)
   mc_udp::Client sensorsClient(host, port);
   LOG_INFO("Connecting UDP control client to " << host << ":" << port + 1)
