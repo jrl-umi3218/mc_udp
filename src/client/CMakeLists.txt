@@ -13,17 +13,20 @@ add_subdirectory(dummy)
 find_package(mc_rtc)
 if(${mc_rtc_FOUND})
   option(BUILD_CLIENT "Build client" ON)
+  find_package(Boost REQUIRED COMPONENTS program_options)
   if(${BUILD_CLIENT})
-    set(MCControlNNG_SRC
+    set(MCUDPControl_SRC
       ${client_SRC}
       ${client_HDR}
-      MCControlNNG.cpp
+      MCUDPControl.cpp
     )
-    add_executable(MCControlNNG ${MCControlNNG_SRC})
-    target_include_directories(MCControlNNG PRIVATE "${PROJECT_SOURCE_DIR}/include")
-    target_link_libraries(MCControlNNG mc_rtc::mc_control nng)
-
-    install(TARGETS MCControlNNG
+    set(TARGET_NAME "MCUDPControlClient")
+    link_directories(${Boost_LIBRARY_DIRS})
+    add_executable(${TARGET_NAME} ${MCUDPControl_SRC})
+    target_include_directories(${TARGET_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/include" ${Boost_INCLUDE_DIRS})
+    target_link_libraries(${TARGET_NAME} mc_rtc::mc_control ${Boost_LIBRARIES})
+    set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME MCUDPControl)
+    install(TARGETS ${TARGET_NAME}
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib
       ARCHIVE DESTINATION lib

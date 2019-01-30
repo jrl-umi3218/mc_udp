@@ -1,8 +1,8 @@
-#include <mc_nng/data/RobotControl.h>
+#include <mc_udp/data/RobotControl.h>
 
 #include <cstring>
 
-namespace mc_nng
+namespace mc_udp
 {
 
 size_t RobotControl::size() const

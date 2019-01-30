@@ -1,91 +1,118 @@
-#include <mc_nng/server/Server.h>
+#include <mc_udp/server/Server.h>
+#include <mc_udp/data/Hello.h>
+#include <mc_udp/data/Init.h>
 
-#include <mc_nng/logging.h>
+#include <mc_udp/logging.h>
 
 #include <stdexcept>
 
-namespace mc_nng
+#include <string.h>
+#include <unistd.h>
+
+namespace mc_udp
 {
 
-Server::Server(const std::string & uri, int timeout)
+Server::Server()
+: socket_(0),
+  recvData_(1024, 0), sendData_(1024,0),
+  initClient_(false), waitInit_(false)
 {
-  start(uri, timeout);
+}
+
+Server::Server(int port)
+: recvData_(1024, 0), sendData_(1024,0),
+  initClient_(false), waitInit_(false)
+{
+  start(port);
+}
+
+Server::~Server()
+{
+  stop();
 }
 
 bool Server::recv()
 {
-  uint8_t * buffer = NULL;
-  size_t size = 0;
-  int err = nng_recv(socket_, &buffer, &size, NNG_FLAG_ALLOC);
-  if(err == 0)
+  int length = recvfrom(socket_, recvData_.data(), recvData_.size(), MSG_DONTWAIT, (struct sockaddr*)&client_, &clientAddrLen_);
+  if(length > 0)
   {
-    do
+    if(length == sizeof(Hello) * sizeof(uint8_t))
     {
-      err = nng_recv(socket_, &buffer, &size, NNG_FLAG_ALLOC | NNG_FLAG_NONBLOCK);
-      if(err == 0)
-      {
-        MC_NNG_INFO("nng_recv got more data from the socket")
-      }
-    } while(err == 0);
-    err = 0;
-    control_.fromBuffer(buffer);
-    nng_free(buffer, size);
-  }
-  else
-  {
-    if(err != NNG_ETIMEDOUT)
-    {
-      MC_NNG_WARNING("nng_recv failed: " << nng_strerror(err))
+      MC_UDP_INFO(id_ << " New client sending data")
+      initClient_ = true;
+      waitInit_ = true;
     }
-    nng_free(buffer, size);
+    else if(length == sizeof(Init) * sizeof(uint8_t))
+    {
+      MC_UDP_INFO(id_ << " Start streaming data to client")
+      sensors().id = 0;
+      initClient_ = false;
+    }
+    else if(length >= static_cast<int>(recvData_.size()))
+    {
+      MC_UDP_WARNING(id_ << " Received exactly the buffer size, resizing for next round")
+      recvData_.resize(2*recvData_.size());
+    }
+    else
+    {
+      control_.fromBuffer(recvData_.data());
+      return true;
+    }
   }
-  return err == 0;
+  return false;
 }
 
 void Server::send()
 {
-  auto size = sensors_.size();
-  auto buffer = nng_alloc(size);
-  sensors_.toBuffer(reinterpret_cast<uint8_t*>(buffer));
-  int err = nng_send(socket_, buffer, size, NNG_FLAG_NONBLOCK | NNG_FLAG_ALLOC);
-  if(err != 0)
+  size_t sz = sensors_.size();
+  if(sz > sendData_.size())
   {
-    if(err != NNG_ETIMEDOUT)
-    {
-      MC_NNG_WARNING("nng_send failed: " << nng_strerror(err))
-    }
-    nng_free(buffer, size);
+    MC_UDP_WARNING(id_ << " Send data buffer is too small for required sending (size: " << sendData_.size() << ", required: " << sz << ")")
+    sendData_.resize(sz);
+  }
+  sensors_.toBuffer(sendData_.data());
+  if((initClient_ && waitInit_) || !initClient_)
+  {
+    waitInit_ = false;
+    sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr*)&client_, clientAddrLen_);
   }
 }
 
 void Server::stop()
 {
-  nng_close(socket_);
+  if(socket_ != 0)
+  {
+    close(socket_);
+  }
 }
 
-void Server::restart(const std::string & uri, int timeout)
+void Server::restart(int port)
 {
   stop();
-  start(uri, timeout);
+  start(port);
 }
 
-void Server::start(const std::string & uri, int timeout)
+void Server::start(int port)
 {
-  int err = nng_pair0_open(&socket_);
-  if(err != 0)
+  std::stringstream ss;
+  ss << "[UDP::" << port << "]";
+  id_ = ss.str();
+  socket_ = socket(AF_INET, SOCK_DGRAM, 0);
+  if(socket_ < 0)
   {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to create socket: " << nng_strerror(err))
+    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed to create socket: " << strerror(errno))
   }
-  err = nng_listen(socket_, uri.c_str(), NULL, 0);
-  if(err != 0)
+  sockaddr_in addr;
+  memset(&addr, 0, sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  addr.sin_port = htons(port);
+  int err = bind(socket_, (struct sockaddr*)&addr, sizeof(addr));
+  if(err < 0)
   {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to create listener: " << nng_strerror(err))
+    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed bind the socket: " << strerror(errno))
   }
-  err = nng_setopt_ms(socket_, NNG_OPT_RECVTIMEO, timeout);
-  if(err != 0)
-  {
-    MC_NNG_ERROR_AND_THROW(std::runtime_error, "Failed to set recv timeout: " << nng_strerror(err))
-  }
+  clientAddrLen_ = sizeof(client_);
 }
 
 }

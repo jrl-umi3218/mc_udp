@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mc_nng/data/RobotControl.h>
-#include <mc_nng/data/RobotSensors.h>
+#include <mc_udp/data/RobotControl.h>
+#include <mc_udp/data/RobotSensors.h>
 
-#include <nng/nng.h>
-#include <nng/protocol/pair0/pair.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
-namespace mc_nng
+namespace mc_udp
 {
 
-/** Implement a simple NNG server of sending robot sensors' data and receiving
+/** Implement a simple UDP server of sending robot sensors' data and receiving
  * control data
  *
  *  Filling the sensors' data and making sure of the time-consistency of
@@ -21,19 +21,20 @@ struct Server {
    *
    * Serving must be started with restart
    */
-  Server() = default;
+  Server();
 
   /** Create the server
    *
    * \param uri URI to bind to
-   *
-   * \param timeout Reception timeout
    */
-  Server(const std::string & uri, int timeout);
+  Server(int port);
+
+  /** Destructor */
+  ~Server();
 
   /** Receive control data
    *
-   * Returns false if no data was received before timeout
+   * Returns false if no data was received.
    *
    * The server does not take care of checking sensor/control consistency
    */
@@ -53,12 +54,19 @@ struct Server {
   void stop();
 
   /** Restart server */
-  void restart(const std::string & uri, int timeout);
+  void restart(int port);
 private:
   RobotControl control_;
   RobotSensors sensors_;
-  nng_socket socket_;
-  void start(const std::string & uri, int timeout);
+  int socket_;
+  sockaddr_in client_;
+  socklen_t clientAddrLen_;
+  std::vector<uint8_t> recvData_;
+  std::vector<uint8_t> sendData_;
+  void start(int port);
+  bool initClient_;
+  bool waitInit_;
+  std::string id_;
 };
 
 }

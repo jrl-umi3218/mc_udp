@@ -1,22 +1,17 @@
-#include <mc_nng/server/Server.h>
-#include <mc_nng/logging.h>
+#include <mc_udp/server/Server.h>
+#include <mc_udp/logging.h>
 
 #include <chrono>
 #include <unistd.h>
 
 int main(int argc, char * argv[])
 {
-  std::string uri = "tcp://*:4444";
-  int timeout = 4;
+  int port = 4444;
   if(argc > 1)
   {
-    uri = argv[1];
+    port = std::atoi(argv[1]);
   }
-  if(argc > 2)
-  {
-    timeout = std::atoi(argv[2]);
-  }
-  mc_nng::Server server(uri, timeout);
+  mc_udp::Server server(port);
   auto & sensors = server.sensors();
   sensors.encoders = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   sensors.torques = {100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110};
@@ -48,7 +43,7 @@ int main(int argc, char * argv[])
     {
       if(server.control().id != server.sensors().id)
       {
-        MC_NNG_WARNING("[dummy] Server control id " << server.control().id << " does not match sensors id " << server.sensors().id)
+        MC_UDP_WARNING("[dummy] Server control id " << server.control().id << " does not match sensors id " << server.sensors().id)
       }
     }
     auto recv_t = std::chrono::system_clock::now();
@@ -56,6 +51,7 @@ int main(int argc, char * argv[])
     std::chrono::duration<double> recv_dt = recv_t - send_t;
     std::cout << "send_dt: " << send_dt.count()*1000 << ", recv_dt: " << recv_dt.count() * 1000 << "\n";
     server.sensors().id += 1;
+    usleep(5000);
   }
   return 0;
 }
