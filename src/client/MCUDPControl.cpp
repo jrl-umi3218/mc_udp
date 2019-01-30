@@ -15,6 +15,33 @@ void handler(int)
   running = false;
 }
 
+void cli(mc_control::MCGlobalController & ctl)
+{
+  while(running)
+  {
+    std::string ui;
+    std::getline(std::cin, ui);
+    std::stringstream ss;
+    ss << ui;
+    std::string token;
+    ss >> token;
+    if(token == "stop")
+    {
+      LOG_INFO("Stopping connection")
+      running = false;
+    }
+    else if(token == "hs" ||
+            token == "GoToHalfSitPose" ||
+            token == "half_sitting")
+    {
+      ctl.GoToHalfSitPose_service();
+    }
+    else
+    {
+      std::cerr << "Unkwown command " << token << std::endl;
+    }
+  }
+}
 
 int main(int argc, char * argv[])
 {
@@ -74,6 +101,7 @@ int main(int argc, char * argv[])
   duration_ms tcp_run_dt{0};
   controller.controller().logger().addLogEntry("perf_TCP", [&tcp_run_dt]() { return tcp_run_dt.count(); });
   signal(SIGINT, handler);
+  std::thread cli_thread([&controller](){ cli(controller); });
   while(running)
   {
     using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
