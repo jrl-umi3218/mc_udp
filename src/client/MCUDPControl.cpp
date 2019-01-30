@@ -6,6 +6,15 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+#include <signal.h>
+
+static bool running = true;
+
+void handler(int)
+{
+  running = false;
+}
+
 
 int main(int argc, char * argv[])
 {
@@ -64,7 +73,8 @@ int main(int argc, char * argv[])
   using duration_ms = std::chrono::duration<double, std::milli>;
   duration_ms tcp_run_dt{0};
   controller.controller().logger().addLogEntry("perf_TCP", [&tcp_run_dt]() { return tcp_run_dt.count(); });
-  while(1)
+  signal(SIGINT, handler);
+  while(running)
   {
     using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
                                             std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
