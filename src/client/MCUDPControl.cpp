@@ -172,6 +172,10 @@ int main(int argc, char * argv[])
       {
         auto init_start = clock::now();
         qInit = sensorsClient.sensors().encoders;
+        for(const auto & j : ignoredJoints)
+        {
+          qInit[refIndex(j)] = jointMiddle(j);
+        }
         controller.init(qInit);
         controller.setGripperCurrentQ(gripperState);
         for(const auto & g : gripperState)
@@ -203,6 +207,7 @@ int main(int argc, char * argv[])
           {
             qOut.resize(rjo.size());
           }
+          double L_HAND_J0_q = sensorsClient.sensors().encoders[L_HAND_J0_idx];
           for(size_t i = 0; i < rjo.size(); ++i)
           {
             const auto & jN = rjo[i];
