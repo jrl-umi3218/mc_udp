@@ -90,7 +90,7 @@ int main(int argc, char * argv[])
   std::map<std::string, sva::ForceVecd> wrenches;
   // FIXME Write gripper control
   std::vector<std::string> ignoredJoints;
-  for(const auto & g : controller.gripperActiveJoints())
+  for(const auto & g : controller.gripperJoints())
   {
     for(const auto & j : g.second)
     {
