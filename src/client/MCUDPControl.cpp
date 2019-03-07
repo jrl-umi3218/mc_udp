@@ -89,12 +89,14 @@ int main(int argc, char * argv[])
   fsensors["lhsensor"] = "LeftHandForceSensor";
   std::map<std::string, sva::ForceVecd> wrenches;
   // FIXME Write gripper control
-  std::vector<std::string> ignoredJoints = {
-    "R_HAND_J0",
-    "R_HAND_J1",
-    "L_HAND_J0",
-    "L_HAND_J1"
-  };
+  std::vector<std::string> ignoredJoints;
+  for(const auto & g : controller.gripperActiveJoints())
+  {
+    for(const auto & j : g.second)
+    {
+      ignoredJoints.push_back(j);
+    }
+  }
   uint64_t prev_id = 0;
   std::vector<double> qInit;
   using duration_ms = std::chrono::duration<double, std::milli>;
