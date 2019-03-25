@@ -88,15 +88,50 @@ int main(int argc, char * argv[])
   fsensors["rhsensor"] = "RightHandForceSensor";
   fsensors["lhsensor"] = "LeftHandForceSensor";
   std::map<std::string, sva::ForceVecd> wrenches;
-  // FIXME Write gripper control
-  std::vector<std::string> ignoredJoints;
+  auto refIndex = [&controller](const std::string & jName)
+  {
+    const auto & rjo = controller.robot().refJointOrder();
+    for(size_t i = 0; i < rjo.size(); ++i)
+    {
+      if(rjo[i] == jName)
+      {
+        return i;
+      }
+    }
+    LOG_ERROR_AND_THROW(std::runtime_error, "No joint named " << jName << " in reference joint order");
+  };
+  auto gripperIndex = [&](const std::vector<std::string> & joints)
+  {
+    std::vector<int> gIndex;
+    for(const auto & j : joints)
+    {
+      gIndex.push_back(refIndex(j));
+    }
+    return gIndex;
+  };
+  std::map<std::string, std::vector<int>> grippers;
+  std::map<std::string, std::vector<int>> grippersAll;
+  std::map<std::string, std::vector<double>> gripperState;
+  for(const auto & g : controller.gripperActiveJoints())
+  {
+    grippers[g.first] = gripperIndex(g.second);
+    gripperState[g.first].resize(g.second.size());
+  }
   for(const auto & g : controller.gripperJoints())
   {
-    for(const auto & j : g.second)
-    {
-      ignoredJoints.push_back(j);
-    }
+    grippersAll[g.first] = gripperIndex(g.second);
   }
+  auto updateGripperState = [&](const std::vector<double> & qIn)
+  {
+    for(auto & g : gripperState)
+    {
+      for(size_t i = 0; i < g.second.size(); ++i)
+      {
+        g.second[i] = qIn[grippers[g.first][i]];
+      }
+    }
+  };
+  std::vector<std::string> ignoredJoints;
   uint64_t prev_id = 0;
   std::vector<double> qInit;
   using duration_ms = std::chrono::duration<double, std::milli>;
@@ -129,11 +164,18 @@ int main(int argc, char * argv[])
         wrenches[fsensors.at(fs.name)] = sva::ForceVecd(reading);
       }
       controller.setWrenches(wrenches);
+      updateGripperState(sensorsClient.sensors().encoders);
+      controller.setActualGripperQ(gripperState);
       if(!init)
       {
         auto init_start = clock::now();
         qInit = sensorsClient.sensors().encoders;
         controller.init(qInit);
+        controller.setGripperCurrentQ(gripperState);
+        for(const auto & g : gripperState)
+        {
+          controller.setGripperTargetQ(g.first, g.second);
+        }
         controller.running = true;
         init = true;
         auto init_end = clock::now();
@@ -184,6 +226,14 @@ int main(int argc, char * argv[])
             if(skipJoint)
             {
               qOut[i] = qInit[i];
+            }
+          }
+          auto gripperQOut = controller.gripperQ();
+          for(const auto & g : grippersAll)
+          {
+            for(size_t i = 0; i < g.second.size(); ++i)
+            {
+              qOut[g.second[i]] = gripperQOut[g.first][i];
             }
           }
           controlClient.control().id = sensorsClient.sensors().id;
