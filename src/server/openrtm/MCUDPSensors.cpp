@@ -57,6 +57,8 @@ MCUDPSensors::MCUDPSensors(RTC::Manager* manager)
     lfsensorIn("lfsensor", lfsensor),
     rhsensorIn("rhsensor", rhsensor),
     lhsensorIn("lhsensor", lhsensor),
+    m_pInIn("pIn", m_pIn),
+    m_floatingBaseIn("floatingBase", m_floatingBase),
     server_()
     // </rtc-template>
 {
@@ -78,6 +80,8 @@ RTC::ReturnCode_t MCUDPSensors::onInitialize()
   addInPort("lfsensor", lfsensorIn);
   addInPort("rhsensor", rhsensorIn);
   addInPort("lhsensor", lhsensorIn);
+  addInPort("pIn", m_pInIn);
+  addInPort("floatingBase", m_floatingBaseIn);
 
   // Bind variables and configuration variable
   bindParameter("is_enabled", m_enabled, "0");
@@ -181,6 +185,25 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
     {
       server_.sensors().torques[i] = m_taucIn.data[i];
     }
+  }
+  if(m_pInIn.isNew())
+  {
+    m_pInIn.read();
+    server_.sensors().position[0] = m_pIn.data.x;
+    server_.sensors().position[1] = m_pIn.data.y;
+    server_.sensors().position[2] = m_pIn.data.z;
+  }
+  if(m_floatingBaseIn.isNew())
+  {
+    m_floatingBaseIn.read();
+    auto& pos= server_.sensors().floatingBasePos;
+    pos[0] = m_floatingBase.data.position.x;
+    pos[1] = m_floatingBase.data.position.y;
+    pos[2] = m_floatingBase.data.position.z;
+    auto& rpy= server_.sensors().floatingBaseRPY;
+    rpy[0] = m_floatingBase.data.orientation.r;
+    rpy[1] = m_floatingBase.data.orientation.p;
+    rpy[2] = m_floatingBase.data.orientation.y;
   }
   if(m_qInIn.isNew())
   {

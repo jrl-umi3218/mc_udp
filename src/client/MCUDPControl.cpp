@@ -145,12 +145,16 @@ int main(int argc, char * argv[])
     if(sensorsClient.recv())
     {
       auto start = clock::now();
-      controller.setEncoderValues(sensorsClient.sensors().encoders);
-      controller.setJointTorques(sensorsClient.sensors().torques);
+      auto &sc = sensorsClient.sensors();
+      controller.setEncoderValues(sc.encoders);
+      controller.setJointTorques(sc.torques);
       Eigen::Vector3d rpy;
       rpy << sensorsClient.sensors().orientation[0], sensorsClient.sensors().orientation[1],
           sensorsClient.sensors().orientation[2];
       controller.setSensorOrientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(rpy)));
+      Eigen::Vector3d pos;
+      pos << sc.position[0], sc.position[1], sc.position[2];
+      controller.setSensorPosition(pos);
       Eigen::Vector3d vel;
       vel << sensorsClient.sensors().angularVelocity[0], sensorsClient.sensors().angularVelocity[1],
           sensorsClient.sensors().angularVelocity[2];
@@ -159,7 +163,13 @@ int main(int argc, char * argv[])
       acc << sensorsClient.sensors().angularAcceleration[0], sensorsClient.sensors().angularAcceleration[1],
           sensorsClient.sensors().angularAcceleration[2];
       controller.setSensorAcceleration(acc);
-      for(const auto & fs : sensorsClient.sensors().fsensors)
+      Eigen::Vector3d fbPos;
+      fbPos << sc.floatingBasePos[0], sc.floatingBasePos[1], sc.floatingBasePos[2];
+      controller.robot().bodySensor("FloatingBase").position(fbPos);
+      Eigen::Vector3d fbRPY;
+      fbRPY << sc.floatingBaseRPY[0], sc.floatingBaseRPY[1], sc.floatingBaseRPY[2];
+      controller.robot().bodySensor("FloatingBase").orientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(fbRPY)));
+      for(const auto & fs : sc.fsensors)
       {
         Eigen::Vector6d reading;
         reading << fs.reading[3], fs.reading[4], fs.reading[5], fs.reading[0], fs.reading[1], fs.reading[2];
@@ -171,11 +181,7 @@ int main(int argc, char * argv[])
       if(!init)
       {
         auto init_start = clock::now();
-        qInit = sensorsClient.sensors().encoders;
-        for(const auto & j : ignoredJoints)
-        {
-          qInit[refIndex(j)] = jointMiddle(j);
-        }
+        qInit = sc.encoders;
         controller.init(qInit);
         controller.setGripperCurrentQ(gripperState);
         for(const auto & g : gripperState)
@@ -192,7 +198,7 @@ int main(int argc, char * argv[])
       }
       else
       {
-        if(prev_id + 1 != sensorsClient.sensors().id)
+        if(prev_id + 1 != sc.id)
         {
           LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: "
                       << prev_id << ", current id: " << sensorsClient.sensors().id << ")")
@@ -207,7 +213,7 @@ int main(int argc, char * argv[])
           {
             qOut.resize(rjo.size());
           }
-          double L_HAND_J0_q = sensorsClient.sensors().encoders[L_HAND_J0_idx];
+          double L_HAND_J0_q = sc.encoders[L_HAND_J0_idx];
           for(size_t i = 0; i < rjo.size(); ++i)
           {
             const auto & jN = rjo[i];
@@ -251,7 +257,7 @@ int main(int argc, char * argv[])
           controlClient.send();
         }
       }
-      prev_id = sensorsClient.sensors().id;
+      prev_id = sc.id;
       tcp_run_dt = clock::now() - start;
     }
   }
