@@ -36,6 +36,8 @@ struct RobotSensors
   double floatingBasePos[3];
   /** Orientation of floating base **/
   double floatingBaseRPY[3];
+  /** Velocity of floating base (linear-angular velocity) **/
+  double floatingBaseVel[6];
 
   /** Add a force sensor reading */
   void fsensor(const std::string & name, double data[6]);

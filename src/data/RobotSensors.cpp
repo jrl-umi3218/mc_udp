@@ -39,7 +39,9 @@ size_t RobotSensors::size() const
     // Size of floating base position
     3 * sizeof(double)+
     // Size of floating base orienation
-    3 * sizeof(double);
+    3 * sizeof(double) +
+    // Size of floating base velocity
+    6 * sizeof(double);
 }
 
 size_t RobotSensors::fsensorsSize() const
@@ -95,6 +97,7 @@ void RobotSensors::toBuffer(uint8_t * buffer) const
   memcpy_advance(buffer, position, 3 * sizeof(double), offset);
   memcpy_advance(buffer, floatingBasePos, 3 * sizeof(double), offset);
   memcpy_advance(buffer, floatingBaseRPY, 3 * sizeof(double), offset);
+  memcpy_advance(buffer, floatingBaseVel, 6 * sizeof(double), offset);
 }
 
 namespace
@@ -140,6 +143,7 @@ void RobotSensors::fromBuffer(uint8_t * buffer)
   memcpy_advance(position, buffer, 3 * sizeof(double), offset);
   memcpy_advance(floatingBasePos, buffer, 3 * sizeof(double), offset);
   memcpy_advance(floatingBaseRPY, buffer, 3 * sizeof(double), offset);
+  memcpy_advance(floatingBaseVel, buffer, 6 * sizeof(double), offset);
 }
 
 } // namespace mc_udp

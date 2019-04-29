@@ -58,7 +58,8 @@ MCUDPSensors::MCUDPSensors(RTC::Manager* manager)
     rhsensorIn("rhsensor", rhsensor),
     lhsensorIn("lhsensor", lhsensor),
     m_pInIn("pIn", m_pIn),
-    m_floatingBaseIn("floatingBase", m_floatingBase),
+    m_poseInIn("poseIn", m_poseIn),
+    m_velInIn("velIn", m_velIn),
     server_()
     // </rtc-template>
 {
@@ -81,7 +82,9 @@ RTC::ReturnCode_t MCUDPSensors::onInitialize()
   addInPort("rhsensor", rhsensorIn);
   addInPort("lhsensor", lhsensorIn);
   addInPort("pIn", m_pInIn);
-  addInPort("floatingBase", m_floatingBaseIn);
+  // Floating base
+  addInPort("poseIn", m_poseInIn);
+  addInPort("velIn", m_velInIn);
 
   // Bind variables and configuration variable
   bindParameter("is_enabled", m_enabled, "0");
@@ -193,17 +196,27 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
     server_.sensors().position[1] = m_pIn.data.y;
     server_.sensors().position[2] = m_pIn.data.z;
   }
-  if(m_floatingBaseIn.isNew())
+  if(m_poseInIn.isNew())
   {
-    m_floatingBaseIn.read();
+    m_poseInIn.read();
     auto& pos= server_.sensors().floatingBasePos;
-    pos[0] = m_floatingBase.data.position.x;
-    pos[1] = m_floatingBase.data.position.y;
-    pos[2] = m_floatingBase.data.position.z;
+    pos[0] = m_poseIn.data.position.x;
+    pos[1] = m_poseIn.data.position.y;
+    pos[2] = m_poseIn.data.position.z;
     auto& rpy= server_.sensors().floatingBaseRPY;
-    rpy[0] = m_floatingBase.data.orientation.r;
-    rpy[1] = m_floatingBase.data.orientation.p;
-    rpy[2] = m_floatingBase.data.orientation.y;
+    rpy[0] = m_poseIn.data.orientation.r;
+    rpy[1] = m_poseIn.data.orientation.p;
+    rpy[2] = m_poseIn.data.orientation.y;
+  }
+  if(m_velInIn.isNew())
+  {
+    m_velInIn.read();
+    server_.sensors().floatingBaseVel[0] = m_velIn.data[0];
+    server_.sensors().floatingBaseVel[1] = m_velIn.data[1];
+    server_.sensors().floatingBaseVel[2] = m_velIn.data[2];
+    server_.sensors().floatingBaseVel[3] = m_velIn.data[3];
+    server_.sensors().floatingBaseVel[4] = m_velIn.data[4];
+    server_.sensors().floatingBaseVel[5] = m_velIn.data[5];
   }
   if(m_qInIn.isNew())
   {

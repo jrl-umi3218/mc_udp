@@ -171,6 +171,10 @@ int main(int argc, char * argv[])
       fbRPY << sc.floatingBaseRPY[0], sc.floatingBaseRPY[1], sc.floatingBaseRPY[2];
       controller.robot().bodySensor("FloatingBase").orientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(fbRPY)));
       controller.realRobots().robot().bodySensor("FloatingBase").orientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(fbRPY)));
+      controller.robot().bodySensor("FloatingBase").linearVelocity(Eigen::Vector3d{sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]});
+      controller.realRobots().robot().bodySensor("FloatingBase").linearVelocity(Eigen::Vector3d{sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]});
+      controller.robot().bodySensor("FloatingBase").angularVelocity(Eigen::Vector3d{sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]});
+      controller.realRobots().robot().bodySensor("FloatingBase").angularVelocity(Eigen::Vector3d{sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]});
       for(const auto & fs : sc.fsensors)
       {
         Eigen::Vector6d reading;
