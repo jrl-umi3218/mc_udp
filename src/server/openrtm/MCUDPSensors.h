@@ -36,8 +36,9 @@ protected:
   RTC::InPort<RTC::TimedDoubleSeq> m_qInIn;
   // Floating base input
   RTC::InPort<RTC::TimedPoint3D> m_pInIn;
-  RTC::InPort<RTC::TimedPose3D> m_poseInIn;
-  RTC::InPort<RTC::TimedDoubleSeq> m_velInIn;
+  RTC::InPort<RTC::TimedPose3D> m_basePoseInIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_baseVelInIn;
+  RTC::InPort<RTC::TimedDoubleSeq> m_baseAccInIn;
 #ifdef MC_UDP_OPENRTM_LEGACY
   RTC::TimedDoubleSeq m_rpyIn;
   RTC::InPort<RTC::TimedDoubleSeq> m_rpyInIn;
@@ -54,8 +55,9 @@ protected:
   RTC::InPort<RTC::TimedAcceleration3D> m_accInIn;
 #endif
   RTC::TimedPoint3D m_pIn;
-  RTC::TimedPose3D m_poseIn;
-  RTC::TimedDoubleSeq m_velIn;
+  RTC::TimedPose3D m_basePoseIn;
+  RTC::TimedDoubleSeq m_baseVelIn;
+  RTC::TimedDoubleSeq m_baseAccIn;
   RTC::TimedDoubleSeq m_taucIn;
   RTC::InPort<RTC::TimedDoubleSeq> m_taucInIn;
   RTC::TimedDoubleSeq rfsensor;

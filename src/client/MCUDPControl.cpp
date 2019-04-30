@@ -163,18 +163,28 @@ int main(int argc, char * argv[])
       acc << sensorsClient.sensors().angularAcceleration[0], sensorsClient.sensors().angularAcceleration[1],
           sensorsClient.sensors().angularAcceleration[2];
       controller.setSensorAcceleration(acc);
+
+      // Floating base
+      // Position
       Eigen::Vector3d fbPos;
       fbPos << sc.floatingBasePos[0], sc.floatingBasePos[1], sc.floatingBasePos[2];
       controller.robot().bodySensor("FloatingBase").position(fbPos);
       controller.realRobots().robot().bodySensor("FloatingBase").position(fbPos);
+      // Orientation
       Eigen::Vector3d fbRPY;
       fbRPY << sc.floatingBaseRPY[0], sc.floatingBaseRPY[1], sc.floatingBaseRPY[2];
       controller.robot().bodySensor("FloatingBase").orientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(fbRPY)));
       controller.realRobots().robot().bodySensor("FloatingBase").orientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(fbRPY)));
+      // Linear velocity
       controller.robot().bodySensor("FloatingBase").linearVelocity(Eigen::Vector3d{sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]});
       controller.realRobots().robot().bodySensor("FloatingBase").linearVelocity(Eigen::Vector3d{sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]});
+      // Angular velocity
       controller.robot().bodySensor("FloatingBase").angularVelocity(Eigen::Vector3d{sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]});
       controller.realRobots().robot().bodySensor("FloatingBase").angularVelocity(Eigen::Vector3d{sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]});
+      // Linear acceleration
+      controller.robot().bodySensor("FloatingBase").acceleration(Eigen::Vector3d{sc.floatingBaseAcc[0], sc.floatingBaseAcc[1], sc.floatingBaseAcc[2]});
+      controller.realRobots().robot().bodySensor("FloatingBase").acceleration(Eigen::Vector3d{sc.floatingBaseAcc[0], sc.floatingBaseAcc[1], sc.floatingBaseAcc[2]});
+
       for(const auto & fs : sc.fsensors)
       {
         Eigen::Vector6d reading;
