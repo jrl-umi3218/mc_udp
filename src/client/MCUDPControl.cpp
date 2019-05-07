@@ -95,10 +95,10 @@ int main(int argc, char * argv[])
     {
       if(rjo[i] == jName)
       {
-        return i;
+        return static_cast<int>(i);
       }
     }
-    LOG_ERROR_AND_THROW(std::runtime_error, "No joint named " << jName << " in reference joint order");
+    return -1;
   };
   auto gripperIndex = [&](const std::vector<std::string> & joints)
   {
@@ -127,7 +127,10 @@ int main(int argc, char * argv[])
     {
       for(size_t i = 0; i < g.second.size(); ++i)
       {
-        g.second[i] = qIn[grippers[g.first][i]];
+        if(qIn[grippers[g.first][i]] != -1)
+        {
+          g.second[i] = qIn[grippers[g.first][i]];
+        }
       }
     }
   };
@@ -233,7 +236,10 @@ int main(int argc, char * argv[])
           {
             for(size_t i = 0; i < g.second.size(); ++i)
             {
-              qOut[g.second[i]] = gripperQOut[g.first][i];
+              if(g.second[i] != -1)
+              {
+                qOut[g.second[i]] = gripperQOut[g.first][i];
+              }
             }
           }
           controlClient.control().id = sensorsClient.sensors().id;
