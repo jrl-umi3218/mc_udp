@@ -6,6 +6,9 @@ variables:
   CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF"
 
 before_script:
+  - wget -q https://cmake.org/files/v3.5/cmake-3.5.1-Linux-x86_64.sh
+  - chmod +x cmake-3.5.1-Linux-x86_64.sh
+  - ./cmake-3.5.1-Linux-x86_64.sh --prefix=/usr --skip-license
   - git submodule update --quiet --init --recursive
   - ./.jrl-ci/dependencies/eigen-3.2
 
