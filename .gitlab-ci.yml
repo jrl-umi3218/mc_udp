@@ -1,0 +1,23 @@
+variables:
+  CI_TOOL: gitlab-ci
+  APT_DEPENDENCIES: "libtinyxml2-dev libboost-all-dev libjsoncpp-dev libgeos++-dev libgeos-dev qhull-bin libqhull-dev libltdl-dev libspacevecalg-dev libeigen-qld-dev libsch-core-dev librbdyn-dev hrpsys-base liblapack-dev libblas-dev libjpeg-dev libpng12-dev"
+  GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/eigen-lssol.git jrl-umi3218/Tasks git@gite.lirmm.fr:multi-contact/mc_rbdyn_urdf_cpp.git nanomsg/nanomsg git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data git@gite.lirmm.fr:multi-contact/mc_rtc"
+  MASTER_PPA: "pierre-gergondet+ppa/multi-contact-unstable hrg/daily"
+  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF"
+
+before_script:
+  - git submodule update --quiet --init --recursive
+  - ./.jrl-ci/dependencies/eigen-3.2
+
+build_it:
+  stage: build
+  script:
+    - export GIT_DEPENDENCIES="$GIT_DEPENDENCIES"
+    - ./.jrl-ci/run before_install
+    - ./.jrl-ci/run build
+    - ./.jrl-ci/run after_success
+  tags:
+    - GCC
+
+stages:
+  - build
