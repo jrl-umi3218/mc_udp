@@ -1,21 +1,17 @@
 #include <mc_udp/client/Client.h>
-
 #include <mc_udp/data/Hello.h>
 #include <mc_udp/data/Init.h>
 #include <mc_udp/logging.h>
 
-#include <stdexcept>
-
 #include <netdb.h>
+#include <stdexcept>
 #include <string.h>
 #include <unistd.h>
 
 namespace mc_udp
 {
 
-Client::Client(const std::string & host, int port)
-: recvData_(1024, 0),
-  sendData_(1024, 0)
+Client::Client(const std::string & host, int port) : recvData_(1024, 0), sendData_(1024, 0)
 {
   socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if(socket_ < 0)
@@ -61,12 +57,12 @@ bool Client::recv()
 
 void Client::sendHello()
 {
-  sendto(socket_, &Hello, sizeof(Hello), 0, (struct sockaddr*)&server_, sizeof(server_));
+  sendto(socket_, &Hello, sizeof(Hello), 0, (struct sockaddr *)&server_, sizeof(server_));
 }
 
 void Client::init()
 {
-  sendto(socket_, &Init, sizeof(Init), 0, (struct sockaddr*)&server_, sizeof(server_));
+  sendto(socket_, &Init, sizeof(Init), 0, (struct sockaddr *)&server_, sizeof(server_));
 }
 
 void Client::send()
@@ -75,11 +71,11 @@ void Client::send()
   auto sz = control_.size();
   if(sz > sendData_.size())
   {
-    sendData_.resize(2*sendData_.size());
+    sendData_.resize(2 * sendData_.size());
     MC_UDP_INFO("Needed to resize sending buffer")
   }
   control_.toBuffer(sendData_.data());
-  sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr*)&server_, sizeof(server_));
+  sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr *)&server_, sizeof(server_));
 }
 
-}
+} // namespace mc_udp

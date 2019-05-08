@@ -17,7 +17,8 @@ namespace mc_udp
  *  sensors' and control data is left to clients of this class
  *
  */
-struct Client {
+struct Client
+{
   /** Create the server
    *
    * \param host Host to send messages to
@@ -43,9 +44,16 @@ struct Client {
    */
   void send();
 
-  inline RobotControl & control() { return control_; }
+  inline RobotControl & control()
+  {
+    return control_;
+  }
 
-  inline const RobotSensors & sensors() const { return sensors_; }
+  inline const RobotSensors & sensors() const
+  {
+    return sensors_;
+  }
+
 private:
   RobotControl control_;
   RobotSensors sensors_;
@@ -59,4 +67,4 @@ private:
   void sendHello();
 };
 
-}
+} // namespace mc_udp

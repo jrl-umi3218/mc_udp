@@ -40,9 +40,10 @@ struct RobotSensors
   void toBuffer(uint8_t * buffer) const;
   /** Fill from a provided buffer */
   void fromBuffer(uint8_t * buffer);
+
 private:
   /** Size of required buffer size for force sensors */
   size_t fsensorsSize() const;
 };
 
-}
+} // namespace mc_udp

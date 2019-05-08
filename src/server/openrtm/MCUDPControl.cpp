@@ -10,8 +10,8 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #ifdef __clang__
-#pragma GCC diagnostic ignored "-Wdelete-incomplete"
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#  pragma GCC diagnostic ignored "-Wdelete-incomplete"
+#  pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #endif
 #include "MCUDPControl.h"
 
@@ -22,6 +22,7 @@
 
 // Module specification
 // <rtc-template block="module_spec">
+// clang-format off
 static const char* mccontrol_spec[] =
   {
     "implementation_id", "MCUDPControl",
@@ -36,7 +37,6 @@ static const char* mccontrol_spec[] =
     "language",          "C++",
     "lang_type",         "compile",
     // Configuration variables
-    "conf.default.timeStep", "0.005",
     "conf.default.is_enabled", "0",
     "conf.default.port", "4445",
     ""
@@ -46,7 +46,6 @@ static const char* mccontrol_spec[] =
 MCUDPControl::MCUDPControl(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
-    m_timeStep(0.005),
     m_enabled(false),
     port(4445),
     m_qOutOut("qOut", m_qOut),
@@ -57,11 +56,9 @@ MCUDPControl::MCUDPControl(RTC::Manager* manager)
     // </rtc-template>
 {
 }
+// clang-format on
 
-MCUDPControl::~MCUDPControl()
-{
-}
-
+MCUDPControl::~MCUDPControl() {}
 
 RTC::ReturnCode_t MCUDPControl::onInitialize()
 {
@@ -70,7 +67,6 @@ RTC::ReturnCode_t MCUDPControl::onInitialize()
   addOutPort("qOut", m_qOutOut);
 
   // Bind variables and configuration variable
-  bindParameter("timeStep", m_timeStep, "0.005");
   bindParameter("is_enabled", m_enabled, "0");
   bindParameter("port", port, "4445");
 
@@ -86,7 +82,6 @@ RTC::ReturnCode_t MCUDPControl::onActivated(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
-
 RTC::ReturnCode_t MCUDPControl::onDeactivated(RTC::UniqueId ec_id)
 {
   MC_UDP_INFO("MCUDPControl::onDeactivated")
@@ -99,8 +94,8 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
 {
   coil::TimeValue coiltm(coil::gettimeofday());
   RTC::Time tm;
-  tm.sec  = static_cast<CORBA::ULong>(coiltm.sec());
-  tm.nsec = static_cast<CORBA::ULong>(coiltm.usec())*1000;
+  tm.sec = static_cast<CORBA::ULong>(coiltm.sec());
+  tm.nsec = static_cast<CORBA::ULong>(coiltm.usec()) * 1000;
   if(m_enabled)
   {
     compute_start = std::chrono::system_clock::now();
@@ -149,16 +144,11 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
 extern "C"
 {
 
-  void MCUDPControlInit(RTC::Manager* manager)
+  void MCUDPControlInit(RTC::Manager * manager)
   {
     coil::Properties profile(mccontrol_spec);
-    manager->registerFactory(profile,
-                             RTC::Create<MCUDPControl>,
-                             RTC::Delete<MCUDPControl>);
+    manager->registerFactory(profile, RTC::Create<MCUDPControl>, RTC::Delete<MCUDPControl>);
   }
-
 };
 
-
 #pragma GCC diagnostic pop
-

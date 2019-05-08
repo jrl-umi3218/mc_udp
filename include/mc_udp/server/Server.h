@@ -16,7 +16,8 @@ namespace mc_udp
  *  sensors' and control data is left to clients of this class
  *
  */
-struct Server {
+struct Server
+{
   /** Create a non-working server
    *
    * Serving must be started with restart
@@ -46,15 +47,22 @@ struct Server {
    */
   void send();
 
-  inline const RobotControl & control() const { return control_; }
+  inline const RobotControl & control() const
+  {
+    return control_;
+  }
 
-  inline RobotSensors & sensors() { return sensors_; }
+  inline RobotSensors & sensors()
+  {
+    return sensors_;
+  }
 
   /** Stop the server */
   void stop();
 
   /** Restart server */
   void restart(int port);
+
 private:
   RobotControl control_;
   RobotSensors sensors_;
@@ -69,4 +77,4 @@ private:
   std::string id_;
 };
 
-}
+} // namespace mc_udp
