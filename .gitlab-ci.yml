@@ -4,6 +4,8 @@ variables:
   GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/eigen-lssol.git jrl-umi3218/Tasks git@gite.lirmm.fr:multi-contact/mc_rbdyn_urdf_cpp.git nanomsg/nanomsg git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data git@gite.lirmm.fr:multi-contact/mc_rtc"
   MASTER_PPA: "pierre-gergondet+ppa/multi-contact-unstable hrg/daily"
   CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF"
+  # No test in this package
+  ALLOW_TESTSUITE_FAILURE: "true"
 
 before_script:
   - wget -q https://cmake.org/files/v3.5/cmake-3.5.1-Linux-x86_64.sh
