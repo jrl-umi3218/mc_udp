@@ -20,7 +20,6 @@ clang-format:
 build_it:
   stage: build
   script:
-    - export GIT_DEPENDENCIES="$GIT_DEPENDENCIES"
     - ./.jrl-ci/run before_install
     - ./.jrl-ci/run build
     - ./.jrl-ci/run after_success
