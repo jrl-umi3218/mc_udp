@@ -9,6 +9,14 @@ before_script:
   - git submodule update --quiet --init --recursive
   - ./.jrl-ci/dependencies/eigen-3.2
 
+clang-format:
+  stage: clang-format
+  before_script: []
+  script:
+    - ./.clang-format-check.sh
+  tags:
+    - clang-format
+
 build_it:
   stage: build
   script:
@@ -20,4 +28,5 @@ build_it:
     - GCC
 
 stages:
+  - clang-format
   - build
