@@ -1,27 +1,18 @@
-#include <mc_udp/server/Server.h>
 #include <mc_udp/data/Hello.h>
 #include <mc_udp/data/Init.h>
-
 #include <mc_udp/logging.h>
+#include <mc_udp/server/Server.h>
 
 #include <stdexcept>
-
 #include <string.h>
 #include <unistd.h>
 
 namespace mc_udp
 {
 
-Server::Server()
-: socket_(0),
-  recvData_(1024, 0), sendData_(1024,0),
-  initClient_(false), waitInit_(false)
-{
-}
+Server::Server() : socket_(0), recvData_(1024, 0), sendData_(1024, 0), initClient_(false), waitInit_(false) {}
 
-Server::Server(int port)
-: recvData_(1024, 0), sendData_(1024,0),
-  initClient_(false), waitInit_(false)
+Server::Server(int port) : recvData_(1024, 0), sendData_(1024, 0), initClient_(false), waitInit_(false)
 {
   start(port);
 }
@@ -33,7 +24,8 @@ Server::~Server()
 
 bool Server::recv()
 {
-  int length = recvfrom(socket_, recvData_.data(), recvData_.size(), MSG_DONTWAIT, (struct sockaddr*)&client_, &clientAddrLen_);
+  int length =
+      recvfrom(socket_, recvData_.data(), recvData_.size(), MSG_DONTWAIT, (struct sockaddr *)&client_, &clientAddrLen_);
   if(length > 0)
   {
     if(length == sizeof(Hello) * sizeof(uint8_t))
@@ -51,7 +43,7 @@ bool Server::recv()
     else if(length >= static_cast<int>(recvData_.size()))
     {
       MC_UDP_WARNING(id_ << " Received exactly the buffer size, resizing for next round")
-      recvData_.resize(2*recvData_.size());
+      recvData_.resize(2 * recvData_.size());
     }
     else
     {
@@ -67,14 +59,15 @@ void Server::send()
   size_t sz = sensors_.size();
   if(sz > sendData_.size())
   {
-    MC_UDP_WARNING(id_ << " Send data buffer is too small for required sending (size: " << sendData_.size() << ", required: " << sz << ")")
+    MC_UDP_WARNING(id_ << " Send data buffer is too small for required sending (size: " << sendData_.size()
+                       << ", required: " << sz << ")")
     sendData_.resize(sz);
   }
   sensors_.toBuffer(sendData_.data());
   if((initClient_ && waitInit_) || !initClient_)
   {
     waitInit_ = false;
-    sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr*)&client_, clientAddrLen_);
+    sendto(socket_, sendData_.data(), sz, 0, (struct sockaddr *)&client_, clientAddrLen_);
   }
 }
 
@@ -107,7 +100,7 @@ void Server::start(int port)
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
   addr.sin_port = htons(port);
-  int err = bind(socket_, (struct sockaddr*)&addr, sizeof(addr));
+  int err = bind(socket_, (struct sockaddr *)&addr, sizeof(addr));
   if(err < 0)
   {
     MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed bind the socket: " << strerror(errno))
@@ -115,4 +108,4 @@ void Server::start(int port)
   clientAddrLen_ = sizeof(client_);
 }
 
-}
+} // namespace mc_udp

@@ -4,31 +4,30 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #ifdef __clang__
-#pragma GCC diagnostic ignored "-Wdelete-incomplete"
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#  pragma GCC diagnostic ignored "-Wdelete-incomplete"
+#  pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #endif
 
-#include <rtm/Manager.h>
-#include <iostream>
-#include <string>
 #include "MCUDPSensors.h"
-
+#include <iostream>
+#include <rtm/Manager.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string>
 
-void MyModuleInit(RTC::Manager* manager)
+void MyModuleInit(RTC::Manager * manager)
 {
   MCUDPSensorsInit(manager);
-  RTC::RtcBase* comp;
+  RTC::RtcBase * comp;
 
   // Create a component
   comp = manager->createComponent("MCUDPSensors");
   std::cout << comp << std::endl;
 }
 
-int main (int argc, char** argv)
+int main(int argc, char ** argv)
 {
-  RTC::Manager* manager;
+  RTC::Manager * manager;
   manager = RTC::Manager::init(argc, argv);
 
   // Initialize manager
@@ -48,4 +47,3 @@ int main (int argc, char** argv)
 }
 
 #pragma GCC diagnostic pop
-

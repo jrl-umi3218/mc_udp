@@ -10,8 +10,8 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #ifdef __clang__
-#pragma GCC diagnostic ignored "-Wdelete-incomplete"
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#  pragma GCC diagnostic ignored "-Wdelete-incomplete"
+#  pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #endif
 #include "MCUDPControl.h"
 
@@ -22,6 +22,7 @@
 
 // Module specification
 // <rtc-template block="module_spec">
+// clang-format off
 static const char* mccontrol_spec[] =
   {
     "implementation_id", "MCUDPControl",
@@ -55,11 +56,9 @@ MCUDPControl::MCUDPControl(RTC::Manager* manager)
     // </rtc-template>
 {
 }
+// clang-format on
 
-MCUDPControl::~MCUDPControl()
-{
-}
-
+MCUDPControl::~MCUDPControl() {}
 
 RTC::ReturnCode_t MCUDPControl::onInitialize()
 {
@@ -83,7 +82,6 @@ RTC::ReturnCode_t MCUDPControl::onActivated(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
-
 RTC::ReturnCode_t MCUDPControl::onDeactivated(RTC::UniqueId ec_id)
 {
   MC_UDP_INFO("MCUDPControl::onDeactivated")
@@ -96,8 +94,8 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
 {
   coil::TimeValue coiltm(coil::gettimeofday());
   RTC::Time tm;
-  tm.sec  = static_cast<CORBA::ULong>(coiltm.sec());
-  tm.nsec = static_cast<CORBA::ULong>(coiltm.usec())*1000;
+  tm.sec = static_cast<CORBA::ULong>(coiltm.sec());
+  tm.nsec = static_cast<CORBA::ULong>(coiltm.usec()) * 1000;
   if(m_enabled)
   {
     compute_start = std::chrono::system_clock::now();
@@ -146,16 +144,11 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
 extern "C"
 {
 
-  void MCUDPControlInit(RTC::Manager* manager)
+  void MCUDPControlInit(RTC::Manager * manager)
   {
     coil::Properties profile(mccontrol_spec);
-    manager->registerFactory(profile,
-                             RTC::Create<MCUDPControl>,
-                             RTC::Delete<MCUDPControl>);
+    manager->registerFactory(profile, RTC::Create<MCUDPControl>, RTC::Delete<MCUDPControl>);
   }
-
 };
 
-
 #pragma GCC diagnostic pop
-

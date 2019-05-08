@@ -1,5 +1,5 @@
-#include <mc_udp/server/Server.h>
 #include <mc_udp/logging.h>
+#include <mc_udp/server/Server.h>
 
 #include <chrono>
 #include <unistd.h>
@@ -43,13 +43,14 @@ int main(int argc, char * argv[])
     {
       if(server.control().id != server.sensors().id)
       {
-        MC_UDP_WARNING("[dummy] Server control id " << server.control().id << " does not match sensors id " << server.sensors().id)
+        MC_UDP_WARNING("[dummy] Server control id " << server.control().id << " does not match sensors id "
+                                                    << server.sensors().id)
       }
     }
     auto recv_t = std::chrono::system_clock::now();
     std::chrono::duration<double> send_dt = send_t - start_t;
     std::chrono::duration<double> recv_dt = recv_t - send_t;
-    std::cout << "send_dt: " << send_dt.count()*1000 << ", recv_dt: " << recv_dt.count() * 1000 << "\n";
+    std::cout << "send_dt: " << send_dt.count() * 1000 << ", recv_dt: " << recv_dt.count() * 1000 << "\n";
     server.sensors().id += 1;
     usleep(5000);
   }

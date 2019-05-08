@@ -2,21 +2,20 @@
 
 #include <mc_udp/server/Server.h>
 
-#include <rtm/idl/BasicDataTypeSkel.h>
-#include <rtm/idl/ExtendedDataTypesSkel.h>
-#include <rtm/Manager.h>
-#include <rtm/DataFlowComponentBase.h>
-#include <rtm/CorbaPort.h>
-#include <rtm/DataInPort.h>
-#include <rtm/DataOutPort.h>
-
 #include <chrono>
 #include <memory>
+#include <rtm/CorbaPort.h>
+#include <rtm/DataFlowComponentBase.h>
+#include <rtm/DataInPort.h>
+#include <rtm/DataOutPort.h>
+#include <rtm/Manager.h>
+#include <rtm/idl/BasicDataTypeSkel.h>
+#include <rtm/idl/ExtendedDataTypesSkel.h>
 
-class MCUDPControl  : public RTC::DataFlowComponentBase
+class MCUDPControl : public RTC::DataFlowComponentBase
 {
 public:
-  MCUDPControl(RTC::Manager* manager);
+  MCUDPControl(RTC::Manager * manager);
   ~MCUDPControl();
 
   virtual RTC::ReturnCode_t onInitialize();
@@ -49,8 +48,7 @@ private:
   uint64_t control_lost_iter_;
 };
 
-
 extern "C"
 {
-  DLL_EXPORT void MCUDPControlInit(RTC::Manager* manager);
+  DLL_EXPORT void MCUDPControlInit(RTC::Manager * manager);
 }

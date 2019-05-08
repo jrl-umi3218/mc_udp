@@ -24,16 +24,16 @@ void RobotSensors::fsensor(const std::string & name, double data[6])
 size_t RobotSensors::size() const
 {
   return
-    // Size of id
-    sizeof(uint64_t) +
-    // Size of encoders buffer lenght + data
-    sizeof(uint64_t) + encoders.size() * sizeof(double) +
-    // Size of torques buffer lenght + data
-    sizeof(uint64_t) + torques.size() * sizeof(double)  +
-    // Size of fsensors
-    fsensorsSize() +
-    // Size of orientation + angularVelocity + angularAcceleration
-    9 * sizeof(double);
+      // Size of id
+      sizeof(uint64_t) +
+      // Size of encoders buffer lenght + data
+      sizeof(uint64_t) + encoders.size() * sizeof(double) +
+      // Size of torques buffer lenght + data
+      sizeof(uint64_t) + torques.size() * sizeof(double) +
+      // Size of fsensors
+      fsensorsSize() +
+      // Size of orientation + angularVelocity + angularAcceleration
+      9 * sizeof(double);
 }
 
 size_t RobotSensors::fsensorsSize() const
@@ -56,7 +56,7 @@ void memcpy_advance(uint8_t * dest, const void * src, size_t n, size_t & offset)
   offset += n;
 }
 
-}
+} // namespace
 
 void RobotSensors::toBuffer(uint8_t * buffer) const
 {
@@ -97,7 +97,7 @@ void memcpy_advance(void * dest, const uint8_t * src, size_t n, size_t & offset)
   offset += n;
 }
 
-}
+} // namespace
 
 void RobotSensors::fromBuffer(uint8_t * buffer)
 {
@@ -130,4 +130,4 @@ void RobotSensors::fromBuffer(uint8_t * buffer)
   memcpy_advance(angularAcceleration, buffer, 3 * sizeof(double), offset);
 }
 
-}
+} // namespace mc_udp

@@ -1,7 +1,6 @@
-#include <mc_udp/client/Client.h>
-
 #include <mc_control/mc_global_controller.h>
 #include <mc_rbdyn/rpy_utils.h>
+#include <mc_udp/client/Client.h>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -30,9 +29,7 @@ void cli(mc_control::MCGlobalController & ctl)
       LOG_INFO("Stopping connection")
       running = false;
     }
-    else if(token == "hs" ||
-            token == "GoToHalfSitPose" ||
-            token == "half_sitting")
+    else if(token == "hs" || token == "GoToHalfSitPose" || token == "half_sitting")
     {
       ctl.GoToHalfSitPose_service();
     }
@@ -50,11 +47,13 @@ int main(int argc, char * argv[])
   int port = 4444;
 
   po::options_description desc("MCControlTCP options");
+  // clang-format off
   desc.add_options()
     ("help", "Display help message")
     ("host,h", po::value<std::string>(&host), "Connection host")
     ("port,p", po::value<int>(&port), "Connection port")
     ("conf,f", po::value<std::string>(&conf_file), "Configuration file");
+  // clang-format on
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -88,8 +87,7 @@ int main(int argc, char * argv[])
   fsensors["rhsensor"] = "RightHandForceSensor";
   fsensors["lhsensor"] = "LeftHandForceSensor";
   std::map<std::string, sva::ForceVecd> wrenches;
-  auto refIndex = [&controller](const std::string & jName)
-  {
+  auto refIndex = [&controller](const std::string & jName) {
     const auto & rjo = controller.robot().refJointOrder();
     for(size_t i = 0; i < rjo.size(); ++i)
     {
@@ -100,8 +98,7 @@ int main(int argc, char * argv[])
     }
     return -1;
   };
-  auto gripperIndex = [&](const std::vector<std::string> & joints)
-  {
+  auto gripperIndex = [&](const std::vector<std::string> & joints) {
     std::vector<int> gIndex;
     for(const auto & j : joints)
     {
@@ -121,8 +118,7 @@ int main(int argc, char * argv[])
   {
     grippersAll[g.first] = gripperIndex(g.second);
   }
-  auto updateGripperState = [&](const std::vector<double> & qIn)
-  {
+  auto updateGripperState = [&](const std::vector<double> & qIn) {
     for(auto & g : gripperState)
     {
       for(size_t i = 0; i < g.second.size(); ++i)
@@ -141,7 +137,7 @@ int main(int argc, char * argv[])
   duration_ms tcp_run_dt{0};
   controller.controller().logger().addLogEntry("perf_TCP", [&tcp_run_dt]() { return tcp_run_dt.count(); });
   signal(SIGINT, handler);
-  std::thread cli_thread([&controller](){ cli(controller); });
+  std::thread cli_thread([&controller]() { cli(controller); });
   while(running)
   {
     using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
@@ -152,13 +148,16 @@ int main(int argc, char * argv[])
       controller.setEncoderValues(sensorsClient.sensors().encoders);
       controller.setJointTorques(sensorsClient.sensors().torques);
       Eigen::Vector3d rpy;
-      rpy << sensorsClient.sensors().orientation[0], sensorsClient.sensors().orientation[1], sensorsClient.sensors().orientation[2];
+      rpy << sensorsClient.sensors().orientation[0], sensorsClient.sensors().orientation[1],
+          sensorsClient.sensors().orientation[2];
       controller.setSensorOrientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(rpy)));
       Eigen::Vector3d vel;
-      vel << sensorsClient.sensors().angularVelocity[0], sensorsClient.sensors().angularVelocity[1], sensorsClient.sensors().angularVelocity[2];
+      vel << sensorsClient.sensors().angularVelocity[0], sensorsClient.sensors().angularVelocity[1],
+          sensorsClient.sensors().angularVelocity[2];
       controller.setSensorAngularVelocity(vel);
       Eigen::Vector3d acc;
-      acc << sensorsClient.sensors().angularAcceleration[0], sensorsClient.sensors().angularAcceleration[1], sensorsClient.sensors().angularAcceleration[2];
+      acc << sensorsClient.sensors().angularAcceleration[0], sensorsClient.sensors().angularAcceleration[1],
+          sensorsClient.sensors().angularAcceleration[2];
       controller.setSensorAcceleration(acc);
       for(const auto & fs : sensorsClient.sensors().fsensors)
       {
@@ -191,7 +190,8 @@ int main(int argc, char * argv[])
       {
         if(prev_id + 1 != sensorsClient.sensors().id)
         {
-          LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: " << prev_id << ", current id: " << sensorsClient.sensors().id << ")")
+          LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: "
+                      << prev_id << ", current id: " << sensorsClient.sensors().id << ")")
         }
         if(controller.run())
         {

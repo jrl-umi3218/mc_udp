@@ -10,8 +10,8 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #ifdef __clang__
-#pragma GCC diagnostic ignored "-Wdelete-incomplete"
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#  pragma GCC diagnostic ignored "-Wdelete-incomplete"
+#  pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #endif
 #include "MCUDPSensors.h"
 
@@ -22,6 +22,7 @@
 
 // Module specification
 // <rtc-template block="module_spec">
+// clang-format off
 static const char* mccontrol_spec[] =
   {
     "implementation_id", "MCUDPSensors",
@@ -60,11 +61,9 @@ MCUDPSensors::MCUDPSensors(RTC::Manager* manager)
     // </rtc-template>
 {
 }
+// clang-format on
 
-MCUDPSensors::~MCUDPSensors()
-{
-}
-
+MCUDPSensors::~MCUDPSensors() {}
 
 RTC::ReturnCode_t MCUDPSensors::onInitialize()
 {
@@ -97,7 +96,6 @@ RTC::ReturnCode_t MCUDPSensors::onActivated(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
-
 RTC::ReturnCode_t MCUDPSensors::onDeactivated(RTC::UniqueId ec_id)
 {
   MC_UDP_INFO("MCUDPSensors::onDeactivated")
@@ -110,7 +108,10 @@ RTC::ReturnCode_t MCUDPSensors::onDeactivated(RTC::UniqueId ec_id)
 namespace
 {
 
-void read_fsensor(const std::string & name, RTC::InPort<RTC::TimedDoubleSeq> & port, RTC::TimedDoubleSeq & data, mc_udp::Server & server_)
+void read_fsensor(const std::string & name,
+                  RTC::InPort<RTC::TimedDoubleSeq> & port,
+                  RTC::TimedDoubleSeq & data,
+                  mc_udp::Server & server_)
 {
   if(port.isNew())
   {
@@ -122,7 +123,7 @@ void read_fsensor(const std::string & name, RTC::InPort<RTC::TimedDoubleSeq> & p
   }
 }
 
-}
+} // namespace
 
 RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
 {
@@ -194,8 +195,8 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
     }
     coil::TimeValue coiltm(coil::gettimeofday());
     RTC::Time tm;
-    tm.sec  = static_cast<CORBA::ULong>(coiltm.sec());
-    tm.nsec = static_cast<CORBA::ULong>(coiltm.usec())*1000;
+    tm.sec = static_cast<CORBA::ULong>(coiltm.sec());
+    tm.nsec = static_cast<CORBA::ULong>(coiltm.usec()) * 1000;
     if(m_enabled)
     {
       compute_start = std::chrono::system_clock::now();
@@ -217,16 +218,11 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
 extern "C"
 {
 
-  void MCUDPSensorsInit(RTC::Manager* manager)
+  void MCUDPSensorsInit(RTC::Manager * manager)
   {
     coil::Properties profile(mccontrol_spec);
-    manager->registerFactory(profile,
-                             RTC::Create<MCUDPSensors>,
-                             RTC::Delete<MCUDPSensors>);
+    manager->registerFactory(profile, RTC::Create<MCUDPSensors>, RTC::Delete<MCUDPSensors>);
   }
-
 };
 
-
 #pragma GCC diagnostic pop
-

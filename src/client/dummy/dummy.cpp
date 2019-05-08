@@ -23,11 +23,12 @@ int main(int argc, char * argv[])
     {
       if(client.sensors().id != prev_id + 1)
       {
-        MC_UDP_WARNING("[dummy] Missed one frame of sensors data (id: " << client.sensors().id << ", previous id: " << prev_id << ")")
+        MC_UDP_WARNING("[dummy] Missed one frame of sensors data (id: " << client.sensors().id
+                                                                        << ", previous id: " << prev_id << ")")
       }
       control.id = client.sensors().id;
       prev_id = control.id;
-      //for(const auto & fs : client.sensors().fsensors)
+      // for(const auto & fs : client.sensors().fsensors)
       //{
       //  std::cout << "- " << fs.name << ": " << fs.reading[0] << ", "
       //                                       << fs.reading[1] << ", "

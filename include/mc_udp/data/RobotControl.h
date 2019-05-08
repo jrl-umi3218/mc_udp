@@ -22,4 +22,4 @@ struct RobotControl
   void fromBuffer(uint8_t * buffer);
 };
 
-}
+} // namespace mc_udp

@@ -34,22 +34,22 @@ static const int OUT_PURPLE = 13;
 static const int OUT_RED = 12;
 } // namespace mc_udp
 
-#  define MC_UDP_ERROR(args)                                       \
+#  define MC_UDP_ERROR(args)                                    \
     SetConsoleTextAttribute(mc_udp::hConsole, mc_udp::OUT_RED); \
     std::cerr << args << std::endl;                             \
     SetConsoleTextAttribute(mc_udp::hConsole, mc_udp::OUT_NONE);
 
-#  define MC_UDP_WARNING(args)                                        \
+#  define MC_UDP_WARNING(args)                                     \
     SetConsoleTextAttribute(mc_udp::hConsole, mc_udp::OUT_PURPLE); \
     std::cerr << args << std::endl;                                \
     SetConsoleTextAttribute(mc_udp::hConsole, mc_udp::OUT_NONE);
 
-#  define MC_UDP_INFO(args)                                         \
+#  define MC_UDP_INFO(args)                                      \
     SetConsoleTextAttribute(mc_udp::hConsole, mc_udp::OUT_BLUE); \
     std::cout << args << std::endl;                              \
     SetConsoleTextAttribute(mc_udp::hConsole, mc_udp::OUT_NONE);
 
-#  define MC_UDP_SUCCESS(args)                                       \
+#  define MC_UDP_SUCCESS(args)                                    \
     SetConsoleTextAttribute(mc_udp::hConsole, mc_udp::OUT_GREEN); \
     std::cout << args << std::endl;                               \
     SetConsoleTextAttribute(mc_udp::hConsole, mc_udp::OUT_NONE);
@@ -57,9 +57,9 @@ static const int OUT_RED = 12;
 #endif
 
 #define MC_UDP_ERROR_AND_THROW(exception_type, args) \
-  {                                               \
-    std::stringstream strstrm;                    \
-    strstrm << args;                              \
+  {                                                  \
+    std::stringstream strstrm;                       \
+    strstrm << args;                                 \
     MC_UDP_ERROR(strstrm.str())                      \
-    throw exception_type(strstrm.str());          \
+    throw exception_type(strstrm.str());             \
   }

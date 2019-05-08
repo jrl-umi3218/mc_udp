@@ -2,21 +2,20 @@
 
 #include <mc_udp/server/Server.h>
 
-#include <rtm/idl/BasicDataTypeSkel.h>
-#include <rtm/idl/ExtendedDataTypesSkel.h>
-#include <rtm/Manager.h>
-#include <rtm/DataFlowComponentBase.h>
-#include <rtm/CorbaPort.h>
-#include <rtm/DataInPort.h>
-#include <rtm/DataOutPort.h>
-
 #include <chrono>
 #include <memory>
+#include <rtm/CorbaPort.h>
+#include <rtm/DataFlowComponentBase.h>
+#include <rtm/DataInPort.h>
+#include <rtm/DataOutPort.h>
+#include <rtm/Manager.h>
+#include <rtm/idl/BasicDataTypeSkel.h>
+#include <rtm/idl/ExtendedDataTypesSkel.h>
 
-class MCUDPSensors  : public RTC::DataFlowComponentBase
+class MCUDPSensors : public RTC::DataFlowComponentBase
 {
 public:
-  MCUDPSensors(RTC::Manager* manager);
+  MCUDPSensors(RTC::Manager * manager);
   ~MCUDPSensors();
 
   virtual RTC::ReturnCode_t onInitialize();
@@ -60,6 +59,7 @@ protected:
   RTC::InPort<RTC::TimedDoubleSeq> rhsensorIn;
   RTC::TimedDoubleSeq lhsensor;
   RTC::InPort<RTC::TimedDoubleSeq> lhsensorIn;
+
 private:
   /* Measure execution time */
   std::chrono::time_point<std::chrono::system_clock> compute_start;
@@ -69,8 +69,7 @@ private:
   mc_udp::Server server_;
 };
 
-
 extern "C"
 {
-  DLL_EXPORT void MCUDPSensorsInit(RTC::Manager* manager);
+  DLL_EXPORT void MCUDPSensorsInit(RTC::Manager * manager);
 }
