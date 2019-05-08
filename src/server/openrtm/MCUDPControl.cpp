@@ -36,7 +36,6 @@ static const char* mccontrol_spec[] =
     "language",          "C++",
     "lang_type",         "compile",
     // Configuration variables
-    "conf.default.timeStep", "0.005",
     "conf.default.is_enabled", "0",
     "conf.default.port", "4445",
     ""
@@ -46,7 +45,6 @@ static const char* mccontrol_spec[] =
 MCUDPControl::MCUDPControl(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
-    m_timeStep(0.005),
     m_enabled(false),
     port(4445),
     m_qOutOut("qOut", m_qOut),
@@ -70,7 +68,6 @@ RTC::ReturnCode_t MCUDPControl::onInitialize()
   addOutPort("qOut", m_qOutOut);
 
   // Bind variables and configuration variable
-  bindParameter("timeStep", m_timeStep, "0.005");
   bindParameter("is_enabled", m_enabled, "0");
   bindParameter("port", port, "4445");
 

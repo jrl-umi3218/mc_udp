@@ -29,7 +29,6 @@ public:
 
 protected:
   // Configuration/Run
-  double m_timeStep;
   bool m_enabled;
   int port;
 
