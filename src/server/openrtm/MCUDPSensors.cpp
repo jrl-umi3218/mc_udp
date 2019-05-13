@@ -213,22 +213,22 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
   if(m_baseVelInIn.isNew())
   {
     m_baseVelInIn.read();
-    server_.sensors().floatingBaseVel[0] = m_baseVelIn.data[0];
-    server_.sensors().floatingBaseVel[1] = m_baseVelIn.data[1];
-    server_.sensors().floatingBaseVel[2] = m_baseVelIn.data[2];
-    server_.sensors().floatingBaseVel[3] = m_baseVelIn.data[3];
-    server_.sensors().floatingBaseVel[4] = m_baseVelIn.data[4];
-    server_.sensors().floatingBaseVel[5] = m_baseVelIn.data[5];
+    server_.sensors().floatingBaseVel[0] = m_baseVelIn.data[3];
+    server_.sensors().floatingBaseVel[1] = m_baseVelIn.data[4];
+    server_.sensors().floatingBaseVel[2] = m_baseVelIn.data[5];
+    server_.sensors().floatingBaseVel[3] = m_baseVelIn.data[0];
+    server_.sensors().floatingBaseVel[4] = m_baseVelIn.data[1];
+    server_.sensors().floatingBaseVel[5] = m_baseVelIn.data[2];
   }
   if(m_baseAccInIn.isNew())
   {
     m_baseAccInIn.read();
-    server_.sensors().floatingBaseAcc[0] = m_baseAccIn.data[0];
-    server_.sensors().floatingBaseAcc[1] = m_baseAccIn.data[1];
-    server_.sensors().floatingBaseAcc[2] = m_baseAccIn.data[2];
-    server_.sensors().floatingBaseAcc[3] = m_baseAccIn.data[3];
-    server_.sensors().floatingBaseAcc[4] = m_baseAccIn.data[4];
-    server_.sensors().floatingBaseAcc[5] = m_baseAccIn.data[5];
+    server_.sensors().floatingBaseAcc[0] = m_baseAccIn.data[3];
+    server_.sensors().floatingBaseAcc[1] = m_baseAccIn.data[4];
+    server_.sensors().floatingBaseAcc[2] = m_baseAccIn.data[5];
+    server_.sensors().floatingBaseAcc[3] = m_baseAccIn.data[0];
+    server_.sensors().floatingBaseAcc[4] = m_baseAccIn.data[1];
+    server_.sensors().floatingBaseAcc[5] = m_baseAccIn.data[2];
   }
   if(m_qInIn.isNew())
   {

@@ -36,9 +36,9 @@ struct RobotSensors
   double floatingBasePos[3];
   /** Orientation of floating base **/
   double floatingBaseRPY[3];
-  /** Velocity of floating base (linear-angular velocity) **/
+  /** Velocity of floating base (angular-linear velocity) **/
   double floatingBaseVel[6];
-  /** Acceleration of floating base (linear-angular) **/
+  /** Acceleration of floating base (angular-linear) **/
   double floatingBaseAcc[6];
 
   /** Add a force sensor reading */

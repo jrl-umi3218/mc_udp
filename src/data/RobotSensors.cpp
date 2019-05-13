@@ -38,7 +38,7 @@ size_t RobotSensors::size() const
       3 * sizeof(double) +
       // Size of floating base position
       3 * sizeof(double) +
-      // Size of floating base orienation
+      // Size of floating base orientation
       3 * sizeof(double) +
       // Size of floating base velocity
       6 * sizeof(double) +
