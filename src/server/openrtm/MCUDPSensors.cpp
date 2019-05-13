@@ -201,11 +201,11 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
   if(m_basePoseInIn.isNew())
   {
     m_basePoseInIn.read();
-    auto& pos= server_.sensors().floatingBasePos;
+    auto & pos = server_.sensors().floatingBasePos;
     pos[0] = m_basePoseIn.data.position.x;
     pos[1] = m_basePoseIn.data.position.y;
     pos[2] = m_basePoseIn.data.position.z;
-    auto& rpy= server_.sensors().floatingBaseRPY;
+    auto & rpy = server_.sensors().floatingBaseRPY;
     rpy[0] = m_basePoseIn.data.orientation.r;
     rpy[1] = m_basePoseIn.data.orientation.p;
     rpy[2] = m_basePoseIn.data.orientation.y;

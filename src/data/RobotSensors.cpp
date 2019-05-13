@@ -24,26 +24,26 @@ void RobotSensors::fsensor(const std::string & name, double data[6])
 size_t RobotSensors::size() const
 {
   return
-    // Size of id
-    sizeof(uint64_t) +
-    // Size of encoders buffer lenght + data
-    sizeof(uint64_t) + encoders.size() * sizeof(double) +
-    // Size of torques buffer lenght + data
-    sizeof(uint64_t) + torques.size() * sizeof(double)  +
-    // Size of fsensors
-    fsensorsSize() +
-    // Size of orientation + angularVelocity + angularAcceleration
-    9 * sizeof(double) +
-    // Size of position (pIn)
-    3 * sizeof(double) +
-    // Size of floating base position
-    3 * sizeof(double)+
-    // Size of floating base orienation
-    3 * sizeof(double) +
-    // Size of floating base velocity
-    6 * sizeof(double) +
-    // Size of floating base linear acceleration
-    6 * sizeof(double);
+      // Size of id
+      sizeof(uint64_t) +
+      // Size of encoders buffer lenght + data
+      sizeof(uint64_t) + encoders.size() * sizeof(double) +
+      // Size of torques buffer lenght + data
+      sizeof(uint64_t) + torques.size() * sizeof(double) +
+      // Size of fsensors
+      fsensorsSize() +
+      // Size of orientation + angularVelocity + angularAcceleration
+      9 * sizeof(double) +
+      // Size of position (pIn)
+      3 * sizeof(double) +
+      // Size of floating base position
+      3 * sizeof(double) +
+      // Size of floating base orienation
+      3 * sizeof(double) +
+      // Size of floating base velocity
+      6 * sizeof(double) +
+      // Size of floating base linear acceleration
+      6 * sizeof(double);
 }
 
 size_t RobotSensors::fsensorsSize() const
