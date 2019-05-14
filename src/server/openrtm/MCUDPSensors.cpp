@@ -57,6 +57,10 @@ MCUDPSensors::MCUDPSensors(RTC::Manager* manager)
     lfsensorIn("lfsensor", lfsensor),
     rhsensorIn("rhsensor", rhsensor),
     lhsensorIn("lhsensor", lhsensor),
+    m_pInIn("pIn", m_pIn),
+    m_basePoseInIn("basePoseIn", m_basePoseIn),
+    m_baseVelInIn("baseVelIn", m_baseVelIn),
+    m_baseAccInIn("baseAccIn", m_baseAccIn),
     server_()
     // </rtc-template>
 {
@@ -78,6 +82,11 @@ RTC::ReturnCode_t MCUDPSensors::onInitialize()
   addInPort("lfsensor", lfsensorIn);
   addInPort("rhsensor", rhsensorIn);
   addInPort("lhsensor", lhsensorIn);
+  addInPort("pIn", m_pInIn);
+  // Floating base
+  addInPort("basePoseIn", m_basePoseInIn);
+  addInPort("baseVelIn", m_baseVelInIn);
+  addInPort("baseAccIn", m_baseAccInIn);
 
   // Bind variables and configuration variable
   bindParameter("is_enabled", m_enabled, "0");
@@ -181,6 +190,45 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
     {
       server_.sensors().torques[i] = m_taucIn.data[i];
     }
+  }
+  if(m_pInIn.isNew())
+  {
+    m_pInIn.read();
+    server_.sensors().position[0] = m_pIn.data.x;
+    server_.sensors().position[1] = m_pIn.data.y;
+    server_.sensors().position[2] = m_pIn.data.z;
+  }
+  if(m_basePoseInIn.isNew())
+  {
+    m_basePoseInIn.read();
+    auto & pos = server_.sensors().floatingBasePos;
+    pos[0] = m_basePoseIn.data.position.x;
+    pos[1] = m_basePoseIn.data.position.y;
+    pos[2] = m_basePoseIn.data.position.z;
+    auto & rpy = server_.sensors().floatingBaseRPY;
+    rpy[0] = m_basePoseIn.data.orientation.r;
+    rpy[1] = m_basePoseIn.data.orientation.p;
+    rpy[2] = m_basePoseIn.data.orientation.y;
+  }
+  if(m_baseVelInIn.isNew())
+  {
+    m_baseVelInIn.read();
+    server_.sensors().floatingBaseVel[0] = m_baseVelIn.data[3];
+    server_.sensors().floatingBaseVel[1] = m_baseVelIn.data[4];
+    server_.sensors().floatingBaseVel[2] = m_baseVelIn.data[5];
+    server_.sensors().floatingBaseVel[3] = m_baseVelIn.data[0];
+    server_.sensors().floatingBaseVel[4] = m_baseVelIn.data[1];
+    server_.sensors().floatingBaseVel[5] = m_baseVelIn.data[2];
+  }
+  if(m_baseAccInIn.isNew())
+  {
+    m_baseAccInIn.read();
+    server_.sensors().floatingBaseAcc[0] = m_baseAccIn.data[3];
+    server_.sensors().floatingBaseAcc[1] = m_baseAccIn.data[4];
+    server_.sensors().floatingBaseAcc[2] = m_baseAccIn.data[5];
+    server_.sensors().floatingBaseAcc[3] = m_baseAccIn.data[0];
+    server_.sensors().floatingBaseAcc[4] = m_baseAccIn.data[1];
+    server_.sensors().floatingBaseAcc[5] = m_baseAccIn.data[2];
   }
   if(m_qInIn.isNew())
   {

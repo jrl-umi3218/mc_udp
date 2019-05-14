@@ -30,6 +30,16 @@ struct RobotSensors
   double angularVelocity[3];
   /** Angular acceleration */
   double angularAcceleration[3];
+  /** Position of IMU (pIn) **/
+  double position[3];
+  /** Position of floating base **/
+  double floatingBasePos[3];
+  /** Orientation of floating base **/
+  double floatingBaseRPY[3];
+  /** Velocity of floating base (angular-linear velocity) **/
+  double floatingBaseVel[6];
+  /** Acceleration of floating base (angular-linear) **/
+  double floatingBaseAcc[6];
 
   /** Add a force sensor reading */
   void fsensor(const std::string & name, double data[6]);

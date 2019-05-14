@@ -145,12 +145,16 @@ int main(int argc, char * argv[])
     if(sensorsClient.recv())
     {
       auto start = clock::now();
-      controller.setEncoderValues(sensorsClient.sensors().encoders);
-      controller.setJointTorques(sensorsClient.sensors().torques);
+      auto & sc = sensorsClient.sensors();
+      controller.setEncoderValues(sc.encoders);
+      controller.setJointTorques(sc.torques);
       Eigen::Vector3d rpy;
       rpy << sensorsClient.sensors().orientation[0], sensorsClient.sensors().orientation[1],
           sensorsClient.sensors().orientation[2];
       controller.setSensorOrientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(rpy)));
+      Eigen::Vector3d pos;
+      pos << sc.position[0], sc.position[1], sc.position[2];
+      controller.setSensorPosition(pos);
       Eigen::Vector3d vel;
       vel << sensorsClient.sensors().angularVelocity[0], sensorsClient.sensors().angularVelocity[1],
           sensorsClient.sensors().angularVelocity[2];
@@ -159,7 +163,27 @@ int main(int argc, char * argv[])
       acc << sensorsClient.sensors().angularAcceleration[0], sensorsClient.sensors().angularAcceleration[1],
           sensorsClient.sensors().angularAcceleration[2];
       controller.setSensorAcceleration(acc);
-      for(const auto & fs : sensorsClient.sensors().fsensors)
+
+      // Floating base sensor
+      controller.setSensorPositions(
+          controller.robot(),
+          {{"FloatingBase", {sc.floatingBasePos[0], sc.floatingBasePos[1], sc.floatingBasePos[2]}}});
+      Eigen::Vector3d fbRPY;
+      controller.setSensorOrientations(
+          controller.robot(),
+          {{"FloatingBase", Eigen::Quaterniond(mc_rbdyn::rpyToMat(
+                                {sc.floatingBaseRPY[0], sc.floatingBaseRPY[1], sc.floatingBaseRPY[2]}))}});
+      controller.setSensorAngularVelocities(
+          controller.robot(),
+          {{"FloatingBase", {sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]}}});
+      controller.setSensorLinearVelocities(
+          controller.robot(),
+          {{"FloatingBase", {sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]}}});
+      controller.setSensorAccelerations(
+          controller.robot(),
+          {{"FloatingBase", {sc.floatingBaseAcc[0], sc.floatingBaseAcc[1], sc.floatingBaseAcc[2]}}});
+
+      for(const auto & fs : sc.fsensors)
       {
         Eigen::Vector6d reading;
         reading << fs.reading[3], fs.reading[4], fs.reading[5], fs.reading[0], fs.reading[1], fs.reading[2];
@@ -171,7 +195,7 @@ int main(int argc, char * argv[])
       if(!init)
       {
         auto init_start = clock::now();
-        qInit = sensorsClient.sensors().encoders;
+        qInit = sc.encoders;
         controller.init(qInit);
         controller.setGripperCurrentQ(gripperState);
         for(const auto & g : gripperState)
@@ -188,7 +212,7 @@ int main(int argc, char * argv[])
       }
       else
       {
-        if(prev_id + 1 != sensorsClient.sensors().id)
+        if(prev_id + 1 != sc.id)
         {
           LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: "
                       << prev_id << ", current id: " << sensorsClient.sensors().id << ")")
@@ -246,7 +270,7 @@ int main(int argc, char * argv[])
           controlClient.send();
         }
       }
-      prev_id = sensorsClient.sensors().id;
+      prev_id = sc.id;
       tcp_run_dt = clock::now() - start;
     }
   }
