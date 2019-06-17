@@ -151,6 +151,17 @@ int main(int argc, char * argv[])
     }
   };
   std::vector<std::string> ignoredJoints;
+  bool ignoredHalfSitting = true;
+  if(config.has("IgnoredJoints"))
+  {
+    const auto & c = config("IgnoredJoints");
+    ignoredJoints = c("joints", std::vector<std::string>{});
+    ignoredHalfSitting = c("halfsitting", true);
+    for(const auto & j : ignoredJoints)
+    {
+      LOG_WARNING("[UDP] Joint " << j << " is ignored");
+    }
+  }
   uint64_t prev_id = 0;
   std::vector<double> qInit;
   using duration_ms = std::chrono::duration<double, std::milli>;
@@ -219,6 +230,17 @@ int main(int argc, char * argv[])
       {
         auto init_start = clock::now();
         qInit = sc.encoders;
+        if(ignoredHalfSitting)
+        {
+          for(size_t i = 0; i < controller.robot().refJointOrder().size(); ++i)
+          {
+            const auto & jN = controller.robot().refJointOrder()[i];
+            if(std::find(ignoredJoints.begin(), ignoredJoints.end(), jN) != ignoredJoints.end())
+            {
+              qInit[i] = controller.robot().stance().at(jN)[0];
+            }
+          }
+        }
         controller.init(qInit);
         controller.setGripperCurrentQ(gripperState);
         for(const auto & g : gripperState)
