@@ -177,7 +177,32 @@ int main(int argc, char * argv[])
     {
       auto start = clock::now();
       auto & sc = sensorsClient.sensors();
-      controller.setEncoderValues(sc.encoders);
+      if(!init)
+      {
+        qInit = sc.encoders;
+        // When true, initialize with halfsitting instead of encoder values for
+        // ingored joints
+        if(ignoredHalfSitting)
+        {
+          for(const auto & jN : ignoredJoints)
+          {
+            const auto & rjo = controller.robot().refJointOrder();
+            const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
+            qInit[idx] = controller.robot().stance().at(jN)[0];
+            LOG_INFO("[UDP] Using halfsitting value for ignored joint " << jN << " = " << qInit[idx]);
+          }
+        }
+      }
+      auto enc = sc.encoders;
+      // Always use initial value for ignored joints (ignore encoder readings)
+      for(const auto & jN : ignoredJoints)
+      {
+        const auto & rjo = controller.robot().refJointOrder();
+        const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
+        enc[idx] = qInit[idx];
+      }
+      controller.setEncoderValues(enc);
+
       controller.setJointTorques(sc.torques);
       Eigen::Vector3d rpy;
       rpy << sensorsClient.sensors().orientation[0], sensorsClient.sensors().orientation[1],
@@ -229,18 +254,6 @@ int main(int argc, char * argv[])
       if(!init)
       {
         auto init_start = clock::now();
-        qInit = sc.encoders;
-        if(ignoredHalfSitting)
-        {
-          for(size_t i = 0; i < controller.robot().refJointOrder().size(); ++i)
-          {
-            const auto & jN = controller.robot().refJointOrder()[i];
-            if(std::find(ignoredJoints.begin(), ignoredJoints.end(), jN) != ignoredJoints.end())
-            {
-              qInit[i] = controller.robot().stance().at(jN)[0];
-            }
-          }
-        }
         controller.init(qInit);
         controller.setGripperCurrentQ(gripperState);
         for(const auto & g : gripperState)
@@ -275,31 +288,23 @@ int main(int argc, char * argv[])
           for(size_t i = 0; i < rjo.size(); ++i)
           {
             const auto & jN = rjo[i];
-            bool skipJoint = false;
-            if(std::find(ignoredJoints.begin(), ignoredJoints.end(), jN) == ignoredJoints.end())
+            if(robot.hasJoint(jN))
             {
-              if(robot.hasJoint(jN))
+              auto jIndex = robot.jointIndexByName(jN);
+              if(mbc.q[jIndex].size() == 1)
               {
-                auto jIndex = robot.jointIndexByName(jN);
-                if(mbc.q[jIndex].size() == 1)
-                {
-                  qOut[i] = mbc.q[robot.jointIndexByName(jN)][0];
-                }
-                else
-                {
-                  skipJoint = true;
-                }
+                qOut[i] = mbc.q[robot.jointIndexByName(jN)][0];
               }
             }
-            else
-            {
-              skipJoint = true;
-            }
-            if(skipJoint)
-            {
-              qOut[i] = qInit[i];
-            }
           }
+
+          // Overwrite the QP output with the initial value for ignoredJoints
+          for(const auto & jN : ignoredJoints)
+          {
+            const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
+            qOut[idx] = qInit[idx];
+          }
+
           auto gripperQOut = controller.gripperQ();
           for(const auto & g : grippersAll)
           {
