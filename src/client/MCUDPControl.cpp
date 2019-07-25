@@ -288,12 +288,16 @@ int main(int argc, char * argv[])
           for(size_t i = 0; i < rjo.size(); ++i)
           {
             const auto & jN = rjo[i];
-            if(robot.hasJoint(jN))
+            if(std::find(ignoredJoints.begin(), ignoredJoints.end(), jN) == ignoredJoints.end())
             {
-              auto jIndex = robot.jointIndexByName(jN);
-              if(mbc.q[jIndex].size() == 1)
+              if(robot.hasJoint(jN))
               {
-                qOut[i] = mbc.q[robot.jointIndexByName(jN)][0];
+                auto jIndex = robot.jointIndexByName(jN);
+                if(mbc.q[jIndex].size() == 1)
+                {
+                  auto jIdx = robot.jointIndexByName(jN);
+                  qOut[i] = mbc.q[jIdx][0];
+                }
               }
             }
           }
