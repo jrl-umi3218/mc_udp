@@ -43,10 +43,10 @@ void cli(mc_control::MCGlobalController & ctl)
 int main(int argc, char * argv[])
 {
   std::string conf_file = "";
-  std::string host = "";
+  std::string host = "localhost";
   int port = 4444;
 
-  po::options_description desc("MCControlTCP options");
+  po::options_description desc("MCUDPControl options");
   // clang-format off
   desc.add_options()
     ("help", "Display help message")
@@ -134,8 +134,8 @@ int main(int argc, char * argv[])
   uint64_t prev_id = 0;
   std::vector<double> qInit;
   using duration_ms = std::chrono::duration<double, std::milli>;
-  duration_ms tcp_run_dt{0};
-  controller.controller().logger().addLogEntry("perf_TCP", [&tcp_run_dt]() { return tcp_run_dt.count(); });
+  duration_ms udp_run_dt{0};
+  controller.controller().logger().addLogEntry("perf_UDP", [&udp_run_dt]() { return udp_run_dt.count(); });
   signal(SIGINT, handler);
   std::thread cli_thread([&controller]() { cli(controller); });
   while(running)
@@ -165,23 +165,26 @@ int main(int argc, char * argv[])
       controller.setSensorAcceleration(acc);
 
       // Floating base sensor
-      controller.setSensorPositions(
-          controller.robot(),
-          {{"FloatingBase", {sc.floatingBasePos[0], sc.floatingBasePos[1], sc.floatingBasePos[2]}}});
-      Eigen::Vector3d fbRPY;
-      controller.setSensorOrientations(
-          controller.robot(),
-          {{"FloatingBase", Eigen::Quaterniond(mc_rbdyn::rpyToMat(
-                                {sc.floatingBaseRPY[0], sc.floatingBaseRPY[1], sc.floatingBaseRPY[2]}))}});
-      controller.setSensorAngularVelocities(
-          controller.robot(),
-          {{"FloatingBase", {sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]}}});
-      controller.setSensorLinearVelocities(
-          controller.robot(),
-          {{"FloatingBase", {sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]}}});
-      controller.setSensorAccelerations(
-          controller.robot(),
-          {{"FloatingBase", {sc.floatingBaseAcc[0], sc.floatingBaseAcc[1], sc.floatingBaseAcc[2]}}});
+      if(controller.robot().hasBodySensor("FloatingBase"))
+      {
+        controller.setSensorPositions(
+            controller.robot(),
+            {{"FloatingBase", {sc.floatingBasePos[0], sc.floatingBasePos[1], sc.floatingBasePos[2]}}});
+        Eigen::Vector3d fbRPY;
+        controller.setSensorOrientations(
+            controller.robot(),
+            {{"FloatingBase", Eigen::Quaterniond(mc_rbdyn::rpyToMat(
+                                  {sc.floatingBaseRPY[0], sc.floatingBaseRPY[1], sc.floatingBaseRPY[2]}))}});
+        controller.setSensorAngularVelocities(
+            controller.robot(),
+            {{"FloatingBase", {sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]}}});
+        controller.setSensorLinearVelocities(
+            controller.robot(),
+            {{"FloatingBase", {sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]}}});
+        controller.setSensorAccelerations(
+            controller.robot(),
+            {{"FloatingBase", {sc.floatingBaseAcc[0], sc.floatingBaseAcc[1], sc.floatingBaseAcc[2]}}});
+      }
 
       for(const auto & fs : sc.fsensors)
       {
@@ -271,7 +274,7 @@ int main(int argc, char * argv[])
         }
       }
       prev_id = sc.id;
-      tcp_run_dt = clock::now() - start;
+      udp_run_dt = clock::now() - start;
     }
   }
   return 0;
