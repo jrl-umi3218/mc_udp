@@ -1,18 +1,15 @@
 variables:
   CI_TOOL: gitlab-ci
-  APT_DEPENDENCIES: "libtinyxml2-dev libboost-all-dev libjsoncpp-dev libgeos++-dev libgeos-dev qhull-bin libqhull-dev libltdl-dev libspacevecalg-dev libeigen-qld-dev libsch-core-dev librbdyn-dev hrpsys-base liblapack-dev libblas-dev libjpeg-dev libpng12-dev"
-  GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/eigen-lssol.git jrl-umi3218/Tasks git@gite.lirmm.fr:multi-contact/mc_rbdyn_urdf_cpp.git nanomsg/nanomsg git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data git@gite.lirmm.fr:multi-contact/mc_rtc"
-  MASTER_PPA: "pierre-gergondet+ppa/multi-contact-unstable hrg/daily"
+  APT_DEPENDENCIES: "libtinyxml2-dev libboost-all-dev libgeos++-dev libgeos-dev libltdl-dev libtasks-qld-dev hrpsys-base liblapack-dev libblas-dev libjpeg-dev libpng12-dev libmc-rbdyn-urdf-dev"
+  GIT_DEPENDENCIES: "nanomsg/nanomsg git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data git@gite.lirmm.fr:multi-contact/mc_rtc"
+  MASTER_PPA: "hrg/daily"
   CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF"
   # No test in this package
   ALLOW_TESTSUITE_FAILURE: "true"
 
 before_script:
-  - wget -q https://cmake.org/files/v3.5/cmake-3.5.1-Linux-x86_64.sh
-  - chmod +x cmake-3.5.1-Linux-x86_64.sh
-  - ./cmake-3.5.1-Linux-x86_64.sh --prefix=/usr --skip-license
   - git submodule update --quiet --init --recursive
-  - ./.jrl-ci/dependencies/eigen-3.2
+  - add-apt-repository ppa:pierre-gergondet+ppa/multi-contact-unstable && apt-get update && apt-get upgrade cmake libeigen3-dev -qq
 
 clang-format:
   stage: clang-format
