@@ -40,6 +40,26 @@ void cli(mc_control::MCGlobalController & ctl)
   }
 }
 
+template<typename T>
+void updateConfig(mc_rtc::Configuration & config, po::variables_map & vm, const char * name, T & param)
+{
+  if(!vm.count(name))
+  {
+    if(config.has(name))
+    {
+      param = static_cast<T>(config(name));
+    }
+    else
+    {
+      config.add(name, param);
+    }
+  }
+  else
+  {
+    config.add(name, param);
+  }
+}
+
 int main(int argc, char * argv[])
 {
   std::string conf_file = "";
@@ -65,16 +85,16 @@ int main(int argc, char * argv[])
     return 1;
   }
 
-  mc_control::MCGlobalController controller(conf_file);
-  mc_rtc::Configuration config = controller.configuration().config("UDP", mc_rtc::Configuration{});
-  if(!vm.count("host"))
+  mc_control::MCGlobalController::GlobalConfiguration gconfig(conf_file, nullptr);
+  auto config = gconfig.config;
+  if(!config.has("UDP"))
   {
-    config("host", host);
+    config.add("UDP");
   }
-  if(!vm.count("port"))
-  {
-    config("port", port);
-  }
+  config = config("UDP");
+  updateConfig(config, vm, "host", host);
+  updateConfig(config, vm, "port", port);
+  mc_control::MCGlobalController controller(gconfig);
   LOG_INFO("Connecting UDP sensors client to " << host << ":" << port)
   mc_udp::Client sensorsClient(host, port);
   LOG_INFO("Connecting UDP control client to " << host << ":" << port + 1)
