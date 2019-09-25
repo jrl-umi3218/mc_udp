@@ -150,20 +150,31 @@ int main(int argc, char * argv[])
       }
     }
   };
-  std::vector<std::string> ignoredJoints;
-  bool ignoredHalfSitting = true;
+  std::map<size_t, double> ignoredJoints;
   if(config.has("IgnoredJoints"))
   {
     const auto & c = config("IgnoredJoints");
-    ignoredJoints = c("joints", std::vector<std::string>{});
-    ignoredHalfSitting = c("halfsitting", true);
-    for(const auto & j : ignoredJoints)
+    std::vector<std::string> joints = c("joints", std::vector<std::string>{});
+    std::map<std::string, double> ignoredValues = c("values", std::map<std::string, double>{});
+
+    for(const auto & jN : joints)
     {
-      LOG_WARNING("[UDP] Joint " << j << " is ignored");
+      const auto & rjo = controller.robot().refJointOrder();
+      const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
+      double qInit = 0;
+      if(ignoredValues.count(jN) > 0)
+      { // Use user-provided value for the ignored joint
+        qInit = ignoredValues[jN];
+      }
+      else
+      { // Use halfsitting configuration
+        qInit = controller.robot().stance().at(jN)[0];
+      }
+      ignoredJoints[idx] = qInit;
+      LOG_WARNING("[UDP] Joint " << jN << " is ignored, value = " << qInit);
     }
   }
   uint64_t prev_id = 0;
-  std::vector<double> qInit;
   using duration_ms = std::chrono::duration<double, std::milli>;
   duration_ms udp_run_dt{0};
   controller.controller().logger().addLogEntry("perf_UDP", [&udp_run_dt]() { return udp_run_dt.count(); });
@@ -177,29 +188,11 @@ int main(int argc, char * argv[])
     {
       auto start = clock::now();
       auto & sc = sensorsClient.sensors();
-      if(!init)
-      {
-        qInit = sc.encoders;
-        // When true, initialize with halfsitting instead of encoder values for
-        // ingored joints
-        if(ignoredHalfSitting)
-        {
-          for(const auto & jN : ignoredJoints)
-          {
-            const auto & rjo = controller.robot().refJointOrder();
-            const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
-            qInit[idx] = controller.robot().stance().at(jN)[0];
-            LOG_INFO("[UDP] Using halfsitting value for ignored joint " << jN << " = " << qInit[idx]);
-          }
-        }
-      }
       auto enc = sc.encoders;
-      // Always use initial value for ignored joints (ignore encoder readings)
-      for(const auto & jN : ignoredJoints)
+      // Ignore encoder value for ignored joints
+      for(const auto & j : ignoredJoints)
       {
-        const auto & rjo = controller.robot().refJointOrder();
-        const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
-        enc[idx] = qInit[idx];
+        enc[j.first] = j.second;
       }
       controller.setEncoderValues(enc);
 
@@ -254,7 +247,7 @@ int main(int argc, char * argv[])
       if(!init)
       {
         auto init_start = clock::now();
-        controller.init(qInit);
+        controller.init(enc);
         controller.setGripperCurrentQ(gripperState);
         for(const auto & g : gripperState)
         {
@@ -288,25 +281,21 @@ int main(int argc, char * argv[])
           for(size_t i = 0; i < rjo.size(); ++i)
           {
             const auto & jN = rjo[i];
-            if(std::find(ignoredJoints.begin(), ignoredJoints.end(), jN) == ignoredJoints.end())
+            if(robot.hasJoint(jN))
             {
-              if(robot.hasJoint(jN))
+              auto jIndex = robot.jointIndexByName(jN);
+              if(mbc.q[jIndex].size() == 1)
               {
-                auto jIndex = robot.jointIndexByName(jN);
-                if(mbc.q[jIndex].size() == 1)
-                {
-                  auto jIdx = robot.jointIndexByName(jN);
-                  qOut[i] = mbc.q[jIdx][0];
-                }
+                auto jIdx = robot.jointIndexByName(jN);
+                qOut[i] = mbc.q[jIdx][0];
               }
             }
           }
 
-          // Overwrite the QP output with the initial value for ignoredJoints
-          for(const auto & jN : ignoredJoints)
+          // Ignore QP output for ignored joints
+          for(const auto & j : ignoredJoints)
           {
-            const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
-            qOut[idx] = qInit[idx];
+            qOut[j.first] = j.second;
           }
 
           auto gripperQOut = controller.gripperQ();
