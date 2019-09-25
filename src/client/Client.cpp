@@ -11,7 +11,7 @@
 namespace mc_udp
 {
 
-Client::Client(const std::string & host, int port) : recvData_(1024, 0), sendData_(1024, 0)
+Client::Client(const std::string & host, int port) : recvData_(2048, 0), sendData_(2048, 0)
 {
   socket_ = socket(AF_INET, SOCK_DGRAM, 0);
   if(socket_ < 0)
