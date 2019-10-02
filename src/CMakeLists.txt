@@ -11,5 +11,28 @@ set(data_HDR
   "${include_DIR}/logging.h"
 )
 
+add_library(mc_udp SHARED ${data_SRC} ${data_HDR})
+target_include_directories(mc_udp PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
 add_subdirectory(client)
 add_subdirectory(server)
+
+install(DIRECTORY "${include_DIR}/data" DESTINATION include/mc_udp)
+install(FILES "${include_DIR}/logging.h" DESTINATION include/mc_udp)
+
+install(
+  TARGETS mc_udp
+  EXPORT mc_udpTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/mc_udp
+)
+
+install(EXPORT mc_udpTargets
+  FILE mc_udpTargets.cmake
+  NAMESPACE mc_udp::
+  DESTINATION lib/cmake/mc_udp
+)
+

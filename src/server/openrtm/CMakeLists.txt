@@ -3,11 +3,9 @@ pkg_check_modules(HRPSYS_BASE hrpsys-base)
 macro(build_rtc_component NAME)
   set(${NAME}_lib_SRC
     ${NAME}.cpp
-    ${server_SRC}
   )
   set(${NAME}_lib_HDR
     ${NAME}.h
-    ${server_HDR}
   )
   link_directories(${NAME} ${HRPSYS_BASE_LIBRARY_DIRS})
   add_library(${NAME} SHARED ${${NAME}_lib_SRC} ${${NAME}_lib_HDR})
@@ -16,7 +14,7 @@ macro(build_rtc_component NAME)
   set_target_properties(${NAME} PROPERTIES PREFIX "")
 
   add_executable(${NAME}Comp ${NAME}Comp.cpp)
-  target_link_libraries(${NAME}Comp ${NAME})
+  target_link_libraries(${NAME}Comp ${NAME} mc_udp_server)
 
   install(TARGETS ${NAME} ${NAME}Comp
     RUNTIME DESTINATION "${HRPSYS_BASE_PREFIX}/bin"
