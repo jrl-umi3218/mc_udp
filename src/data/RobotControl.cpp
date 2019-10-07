@@ -7,7 +7,8 @@ namespace mc_udp
 
 size_t RobotControl::size() const
 {
-  return sizeof(uint64_t) + sizeof(uint64_t) + encoders.size() * sizeof(double);
+  return sizeof(uint64_t) + sizeof(uint64_t) + encoders.size() * sizeof(double) + sizeof(uint64_t)
+         + encoderVelocities.size() * sizeof(double);
 }
 
 namespace

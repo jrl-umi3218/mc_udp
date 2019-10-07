@@ -73,10 +73,10 @@ int main(int argc, char * argv[])
   // clang-format off
   desc.add_options()
     ("help", "Display help message")
+    ("encoderVelocity", "Send/receive encoder velocities")
     ("host,h", po::value<std::string>(&host), "Connection host")
     ("port,p", po::value<int>(&port), "Connection port")
-    ("conf,f", po::value<std::string>(&conf_file), "Configuration file")
-    ("encoderVelocity", po::value<bool>(&withEncoderVelocity), "Send/receive encoder velocities");
+    ("conf,f", po::value<std::string>(&conf_file), "Configuration file");
   // clang-format on
 
   po::variables_map vm;
@@ -87,6 +87,12 @@ int main(int argc, char * argv[])
   {
     std::cout << desc << std::endl;
     return 1;
+  }
+
+  if(vm.count("encoderVelocity"))
+  {
+    LOG_INFO("[UDP] Sending/Receiving encoder velocities");
+    withEncoderVelocity = true;
   }
 
   mc_control::MCGlobalController::GlobalConfiguration gconfig(conf_file, nullptr);
