@@ -159,19 +159,27 @@ int main(int argc, char * argv[])
 
     for(const auto & jN : joints)
     {
-      const auto & rjo = controller.robot().refJointOrder();
-      const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
-      double qInit = 0;
-      if(ignoredValues.count(jN) > 0)
-      { // Use user-provided value for the ignored joint
-        qInit = ignoredValues[jN];
+      if(controller.robot().hasJoint(jN))
+      {
+        const auto & rjo = controller.robot().refJointOrder();
+        const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
+        double qInit = 0;
+        if(ignoredValues.count(jN) > 0)
+        { // Use user-provided value for the ignored joint
+          qInit = ignoredValues[jN];
+        }
+        else
+        {
+          // Use halfsitting configuration
+          qInit = controller.robot().stance().at(jN)[0];
+        }
+        ignoredJoints[idx] = qInit;
+        LOG_WARNING("[UDP] Joint " << jN << " is ignored, value = " << qInit);
       }
       else
-      { // Use halfsitting configuration
-        qInit = controller.robot().stance().at(jN)[0];
+      {
+        LOG_WARNING("[UDP] Ignored joint " << jN << " is not present in robot " << controller.robot().name());
       }
-      ignoredJoints[idx] = qInit;
-      LOG_WARNING("[UDP] Joint " << jN << " is ignored, value = " << qInit);
     }
   }
   uint64_t prev_id = 0;
