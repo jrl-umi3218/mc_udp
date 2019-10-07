@@ -217,9 +217,9 @@ int main(int argc, char * argv[])
     {
       auto start = clock::now();
       auto & sc = sensorsClient.sensors();
-      // XXX copy
-      auto enc = sc.encoders;
-      auto encVel = sc.encoderVelocities;
+      // XXX const cast to avoid needless copy
+      auto & enc = const_cast<std::vector<double>&>(sc.encoders);
+      auto & encVel = const_cast<std::vector<double>&>(sc.encoderVelocities);
 
       // Ignore encoder value for ignored joints
       for(const auto & j : ignoredJoints)
@@ -234,8 +234,8 @@ int main(int argc, char * argv[])
         }
       }
 
-      controller.setEncoderValues(sc.encoders);
-      controller.setEncoderVelocities(sc.encoderVelocities);
+      controller.setEncoderValues(enc);
+      controller.setEncoderVelocities(encVel);
 
       controller.setJointTorques(sc.torques);
       Eigen::Vector3d rpy;
@@ -346,6 +346,10 @@ int main(int argc, char * argv[])
           for(const auto & j : ignoredJoints)
           {
             qOut[j.first] = j.second;
+          }
+          for(const auto & j : ignoredVelocities)
+          {
+            alphaOut[j.first] = j.second;
           }
 
           auto gripperQOut = controller.gripperQ();
