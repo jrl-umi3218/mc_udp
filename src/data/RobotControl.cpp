@@ -31,6 +31,10 @@ void RobotControl::toBuffer(uint8_t * buffer) const
   tmp = encoders.size();
   memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
   memcpy_advance(buffer, encoders.data(), tmp * sizeof(double), offset);
+
+  tmp = encoderVelocities.size();
+  memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
+  memcpy_advance(buffer, encoderVelocities.data(), tmp * sizeof(double), offset);
 }
 
 namespace
@@ -54,6 +58,10 @@ void RobotControl::fromBuffer(uint8_t * buffer)
   memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
   encoders.resize(tmp);
   memcpy_advance(encoders.data(), buffer, tmp * sizeof(double), offset);
+
+  memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
+  encoderVelocities.resize(tmp);
+  memcpy_advance(encoderVelocities.data(), buffer, tmp * sizeof(double), offset);
 }
 
 } // namespace mc_udp
