@@ -28,7 +28,10 @@ install(EXPORT mc_udp_serverTargets
   DESTINATION lib/cmake/mc_udp
 )
 
-add_subdirectory(dummy)
+if(${BUILD_DUMMY_SERVER})
+  add_subdirectory(dummy)
+endif()
+
 if(${BUID_OPENRTM_SERVER})
   add_subdirectory(openrtm)
 endif()
