@@ -7,7 +7,8 @@ set(server_SRC
 )
 
 add_library(mc_udp_server SHARED ${server_SRC} ${server_HDR})
-target_link_libraries(mc_udp_server PUBLIC mc_udp)
+set_target_properties(mc_udp_server PROPERTIES EXPORT_NAME server)
+target_link_libraries(mc_udp_server PUBLIC mc_udp_data)
 target_include_directories(mc_udp_server PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)

@@ -2,7 +2,8 @@ set(client_HDR "${include_DIR}/client/Client.h")
 set(client_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Client.cpp")
 
 add_library(mc_udp_client SHARED ${client_SRC} ${client_HDR})
-target_link_libraries(mc_udp_client PUBLIC mc_udp)
+set_target_properties(mc_udp_client PROPERTIES EXPORT_NAME client)
+target_link_libraries(mc_udp_client PUBLIC mc_udp_data)
 
 install(
   TARGETS mc_udp_client

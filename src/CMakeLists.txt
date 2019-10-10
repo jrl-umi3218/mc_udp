@@ -11,19 +11,21 @@ set(data_HDR
   "${include_DIR}/logging.h"
 )
 
-add_library(mc_udp SHARED ${data_SRC} ${data_HDR})
-target_include_directories(mc_udp PUBLIC
+add_library(mc_udp_data SHARED ${data_SRC} ${data_HDR})
+set_target_properties(mc_udp_data PROPERTIES EXPORT_NAME data)
+target_include_directories(mc_udp_data PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
 add_subdirectory(client)
 add_subdirectory(server)
 
-install(DIRECTORY "${include_DIR}/data" DESTINATION include/mc_udp)
+install(DIRECTORY "${include_DIR}/data" DESTINATION include/mc_udp
+        FILES_MATCHING PATTERN "*.h")
 install(FILES "${include_DIR}/logging.h" DESTINATION include/mc_udp)
 
 install(
-  TARGETS mc_udp
+  TARGETS mc_udp_data
   EXPORT mc_udpTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
