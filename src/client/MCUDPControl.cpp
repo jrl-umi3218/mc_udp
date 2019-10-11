@@ -218,8 +218,8 @@ int main(int argc, char * argv[])
       auto start = clock::now();
       auto & sc = sensorsClient.sensors();
       // XXX const cast to avoid needless copy
-      auto & enc = const_cast<std::vector<double>&>(sc.encoders);
-      auto & encVel = const_cast<std::vector<double>&>(sc.encoderVelocities);
+      auto & enc = const_cast<std::vector<double> &>(sc.encoders);
+      auto & encVel = const_cast<std::vector<double> &>(sc.encoderVelocities);
 
       // Ignore encoder value for ignored joints
       for(const auto & j : ignoredJoints)
