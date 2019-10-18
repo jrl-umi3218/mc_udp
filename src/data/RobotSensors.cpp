@@ -26,9 +26,11 @@ size_t RobotSensors::size() const
   return
       // Size of id
       sizeof(uint64_t) +
-      // Size of encoders buffer lenght + data
+      // Size of encoders buffer length + data
       sizeof(uint64_t) + encoders.size() * sizeof(double) +
-      // Size of torques buffer lenght + data
+      // Size of encoder velocities buffer length + data
+      sizeof(uint64_t) + encoderVelocities.size() * sizeof(double) +
+      // Size of torques buffer length + data
       sizeof(uint64_t) + torques.size() * sizeof(double) +
       // Size of fsensors
       fsensorsSize() +
@@ -79,6 +81,10 @@ void RobotSensors::toBuffer(uint8_t * buffer) const
   memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
   memcpy_advance(buffer, encoders.data(), encoders.size() * sizeof(double), offset);
 
+  tmp = encoderVelocities.size();
+  memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
+  memcpy_advance(buffer, encoderVelocities.data(), encoderVelocities.size() * sizeof(double), offset);
+
   tmp = torques.size();
   memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
   memcpy_advance(buffer, torques.data(), torques.size() * sizeof(double), offset);
@@ -124,6 +130,10 @@ void RobotSensors::fromBuffer(uint8_t * buffer)
   memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
   encoders.resize(tmp);
   memcpy_advance(encoders.data(), buffer, tmp * sizeof(double), offset);
+
+  memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
+  encoderVelocities.resize(tmp);
+  memcpy_advance(encoderVelocities.data(), buffer, tmp * sizeof(double), offset);
 
   memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
   torques.resize(tmp);

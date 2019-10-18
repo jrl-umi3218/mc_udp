@@ -13,6 +13,9 @@ struct RobotControl
   uint64_t id;
   /** Joint encoders provided in the robot reference order */
   std::vector<double> encoders;
+  /** Desired encoder velocity provided in the robot reference order
+   * May be empty */
+  std::vector<double> encoderVelocities;
 
   /** Compute required buffer size */
   size_t size() const;

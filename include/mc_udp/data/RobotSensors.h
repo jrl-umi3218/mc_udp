@@ -20,6 +20,8 @@ struct RobotSensors
   uint64_t id;
   /** Joint encoders provided in the robot reference order */
   std::vector<double> encoders;
+  /** Joint encoders velocity in the robot reference order */
+  std::vector<double> encoderVelocities;
   /** Joint torques provided in the robot reference order */
   std::vector<double> torques;
   /** Force sensors readings */

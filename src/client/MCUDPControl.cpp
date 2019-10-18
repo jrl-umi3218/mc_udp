@@ -66,10 +66,14 @@ int main(int argc, char * argv[])
   std::string host = "localhost";
   int port = 4444;
 
+  /** Whether encoder desired velocities should be sent */
+  bool withEncoderVelocity = false;
+
   po::options_description desc("MCUDPControl options");
   // clang-format off
   desc.add_options()
     ("help", "Display help message")
+    ("encoderVelocity", "Send/receive encoder velocities")
     ("host,h", po::value<std::string>(&host), "Connection host")
     ("port,p", po::value<int>(&port), "Connection port")
     ("conf,f", po::value<std::string>(&conf_file), "Configuration file");
@@ -83,6 +87,12 @@ int main(int argc, char * argv[])
   {
     std::cout << desc << std::endl;
     return 1;
+  }
+
+  if(vm.count("encoderVelocity"))
+  {
+    LOG_INFO("[UDP] Sending/Receiving encoder velocities");
+    withEncoderVelocity = true;
   }
 
   mc_control::MCGlobalController::GlobalConfiguration gconfig(conf_file, nullptr);
@@ -151,11 +161,13 @@ int main(int argc, char * argv[])
     }
   };
   std::map<size_t, double> ignoredJoints;
+  std::map<size_t, double> ignoredVelocities;
   if(config.has("IgnoredJoints"))
   {
     const auto & c = config("IgnoredJoints");
     std::vector<std::string> joints = c("joints", std::vector<std::string>{});
     std::map<std::string, double> ignoredValues = c("values", std::map<std::string, double>{});
+    std::map<std::string, double> ignoredVelocityValues = c("velocities", std::map<std::string, double>{});
 
     for(const auto & jN : joints)
     {
@@ -164,6 +176,8 @@ int main(int argc, char * argv[])
         const auto & rjo = controller.robot().refJointOrder();
         const auto idx = std::distance(rjo.begin(), std::find(rjo.begin(), rjo.end(), jN));
         double qInit = 0;
+        double alphaInit = 0;
+        // Ignored joint values
         if(ignoredValues.count(jN) > 0)
         { // Use user-provided value for the ignored joint
           qInit = ignoredValues[jN];
@@ -174,7 +188,14 @@ int main(int argc, char * argv[])
           qInit = controller.robot().stance().at(jN)[0];
         }
         ignoredJoints[idx] = qInit;
-        LOG_WARNING("[UDP] Joint " << jN << " is ignored, value = " << qInit);
+
+        // Ignored velocity values
+        if(ignoredVelocityValues.count(jN) > 0)
+        { // Use user-provided value for the ignored joint
+          alphaInit = ignoredVelocityValues[jN];
+        }
+        ignoredVelocities[idx] = alphaInit;
+        LOG_WARNING("[UDP] Joint " << jN << " is ignored, value = " << qInit << ", velocity=" << alphaInit);
       }
       else
       {
@@ -188,6 +209,8 @@ int main(int argc, char * argv[])
   controller.controller().logger().addLogEntry("perf_UDP", [&udp_run_dt]() { return udp_run_dt.count(); });
   signal(SIGINT, handler);
   std::thread cli_thread([&controller]() { cli(controller); });
+  std::vector<double> qIn;
+  std::vector<double> alphaIn;
   while(running)
   {
     using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
@@ -196,13 +219,24 @@ int main(int argc, char * argv[])
     {
       auto start = clock::now();
       auto & sc = sensorsClient.sensors();
-      auto enc = sc.encoders;
+      qIn = const_cast<std::vector<double> &>(sc.encoders);
+      alphaIn = const_cast<std::vector<double> &>(sc.encoderVelocities);
+
       // Ignore encoder value for ignored joints
       for(const auto & j : ignoredJoints)
       {
-        enc[j.first] = j.second;
+        qIn[j.first] = j.second;
       }
-      controller.setEncoderValues(enc);
+      if(withEncoderVelocity)
+      {
+        for(const auto & j : ignoredVelocities)
+        {
+          alphaIn[j.first] = j.second;
+        }
+      }
+
+      controller.setEncoderValues(qIn);
+      controller.setEncoderVelocities(alphaIn);
 
       controller.setJointTorques(sc.torques);
       Eigen::Vector3d rpy;
@@ -255,7 +289,7 @@ int main(int argc, char * argv[])
       if(!init)
       {
         auto init_start = clock::now();
-        controller.init(enc);
+        controller.init(qIn);
         controller.setGripperCurrentQ(gripperState);
         for(const auto & g : gripperState)
         {
@@ -265,6 +299,17 @@ int main(int argc, char * argv[])
         init = true;
         auto init_end = clock::now();
         duration_ms init_dt = init_end - init_start;
+        const auto & rjo = controller.ref_joint_order();
+        auto & qOut = controlClient.control().encoders;
+        auto & alphaOut = controlClient.control().encoderVelocities;
+        if(qOut.size() != rjo.size())
+        {
+          qOut.resize(rjo.size());
+        }
+        if(withEncoderVelocity && alphaOut.size() != rjo.size())
+        {
+          alphaOut.resize(rjo.size());
+        }
         LOG_INFO("[MCUDPControl] Init duration " << init_dt.count())
         sensorsClient.init();
         controlClient.init();
@@ -282,10 +327,7 @@ int main(int argc, char * argv[])
           const auto & mbc = robot.mbc();
           const auto & rjo = controller.ref_joint_order();
           auto & qOut = controlClient.control().encoders;
-          if(qOut.size() != rjo.size())
-          {
-            qOut.resize(rjo.size());
-          }
+          auto & alphaOut = controlClient.control().encoderVelocities;
           for(size_t i = 0; i < rjo.size(); ++i)
           {
             const auto & jN = rjo[i];
@@ -296,6 +338,10 @@ int main(int argc, char * argv[])
               {
                 auto jIdx = robot.jointIndexByName(jN);
                 qOut[i] = mbc.q[jIdx][0];
+                if(withEncoderVelocity)
+                {
+                  alphaOut[i] = mbc.alpha[jIdx][0];
+                }
               }
             }
           }
@@ -304,6 +350,10 @@ int main(int argc, char * argv[])
           for(const auto & j : ignoredJoints)
           {
             qOut[j.first] = j.second;
+          }
+          for(const auto & j : ignoredVelocities)
+          {
+            alphaOut[j.first] = j.second;
           }
 
           auto gripperQOut = controller.gripperQ();
