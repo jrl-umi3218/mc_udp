@@ -7,6 +7,7 @@ set(server_SRC
 )
 
 add_library(mc_udp_server SHARED ${server_SRC} ${server_HDR})
+add_library(mc_udp::server ALIAS mc_udp_server)
 set_target_properties(mc_udp_server PROPERTIES EXPORT_NAME server)
 target_link_libraries(mc_udp_server PUBLIC mc_udp_data)
 target_include_directories(mc_udp_server PUBLIC
@@ -32,6 +33,6 @@ if(${BUILD_DUMMY_SERVER})
   add_subdirectory(dummy)
 endif()
 
-if(${BUID_OPENRTM_SERVER})
+if(${BUILD_OPENRTM_SERVER})
   add_subdirectory(openrtm)
 endif()
