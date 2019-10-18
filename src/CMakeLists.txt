@@ -12,6 +12,7 @@ set(data_HDR
 )
 
 add_library(mc_udp_data SHARED ${data_SRC} ${data_HDR})
+add_library(mc_udp::data ALIAS mc_udp_data)
 set_target_properties(mc_udp_data PROPERTIES EXPORT_NAME data)
 target_include_directories(mc_udp_data PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

@@ -1,9 +1,9 @@
 variables:
   CI_TOOL: gitlab-ci
   APT_DEPENDENCIES: "libtinyxml2-dev libboost-all-dev libgeos++-dev libgeos-dev libltdl-dev libtasks-qld-dev hrpsys-base liblapack-dev libblas-dev libjpeg-dev libpng12-dev libmc-rbdyn-urdf-dev"
-  GIT_DEPENDENCIES: "nanomsg/nanomsg git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data git@gite.lirmm.fr:multi-contact/mc_rtc"
+  GIT_DEPENDENCIES: "nanomsg/nanomsg git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data humanoid-path-planner/hpp-spline git@gite.lirmm.fr:multi-contact/mc_rtc"
   MASTER_PPA: "hrg/daily"
-  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF"
+  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF -DBUILD_PYTHON_INTERFACE:BOOL=OFF"
   # No test in this package
   ALLOW_TESTSUITE_FAILURE: "true"
 

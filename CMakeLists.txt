@@ -4,7 +4,7 @@ project(mc_udp CXX)
 set(CMAKE_CXX_STANDARD 11)
 
 option(BUILD_MC_RTC_CLIENT "Build mc_rtc client" ON)
-option(BUILD_OPENRTM_SERVER "Build openrtm server" ON)
+option(BUILD_OPENRTM_SERVER "Build OpenRTM server component" ON)
 option(BUILD_DUMMY_CLIENT "Build dummy client" OFF)
 option(BUILD_DUMMY_SERVER "Build dummy server" OFF)
 
