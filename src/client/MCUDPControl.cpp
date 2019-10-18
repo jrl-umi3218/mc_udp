@@ -219,8 +219,8 @@ int main(int argc, char * argv[])
     {
       auto start = clock::now();
       auto & sc = sensorsClient.sensors();
-      qIn = const_cast<std::vector<double> &>(sc.encoders);
-      alphaIn = const_cast<std::vector<double> &>(sc.encoderVelocities);
+      qIn = sc.encoders;
+      alphaIn = sc.encoderVelocities;
 
       // Ignore encoder value for ignored joints
       for(const auto & j : ignoredJoints)
