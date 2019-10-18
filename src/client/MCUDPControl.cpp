@@ -209,6 +209,8 @@ int main(int argc, char * argv[])
   controller.controller().logger().addLogEntry("perf_UDP", [&udp_run_dt]() { return udp_run_dt.count(); });
   signal(SIGINT, handler);
   std::thread cli_thread([&controller]() { cli(controller); });
+  std::vector<double> qIn;
+  std::vector<double> alphaIn;
   while(running)
   {
     using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
@@ -217,25 +219,24 @@ int main(int argc, char * argv[])
     {
       auto start = clock::now();
       auto & sc = sensorsClient.sensors();
-      // XXX const cast to avoid needless copy
-      auto & enc = const_cast<std::vector<double> &>(sc.encoders);
-      auto & encVel = const_cast<std::vector<double> &>(sc.encoderVelocities);
+      qIn = const_cast<std::vector<double> &>(sc.encoders);
+      alphaIn = const_cast<std::vector<double> &>(sc.encoderVelocities);
 
       // Ignore encoder value for ignored joints
       for(const auto & j : ignoredJoints)
       {
-        enc[j.first] = j.second;
+        qIn[j.first] = j.second;
       }
       if(withEncoderVelocity)
       {
         for(const auto & j : ignoredVelocities)
         {
-          encVel[j.first] = j.second;
+          alphaIn[j.first] = j.second;
         }
       }
 
-      controller.setEncoderValues(enc);
-      controller.setEncoderVelocities(encVel);
+      controller.setEncoderValues(qIn);
+      controller.setEncoderVelocities(alphaIn);
 
       controller.setJointTorques(sc.torques);
       Eigen::Vector3d rpy;
@@ -288,7 +289,7 @@ int main(int argc, char * argv[])
       if(!init)
       {
         auto init_start = clock::now();
-        controller.init(enc);
+        controller.init(qIn);
         controller.setGripperCurrentQ(gripperState);
         for(const auto & g : gripperState)
         {
@@ -298,6 +299,17 @@ int main(int argc, char * argv[])
         init = true;
         auto init_end = clock::now();
         duration_ms init_dt = init_end - init_start;
+        const auto & rjo = controller.ref_joint_order();
+        auto & qOut = controlClient.control().encoders;
+        auto & alphaOut = controlClient.control().encoderVelocities;
+        if(qOut.size() != rjo.size())
+        {
+          qOut.resize(rjo.size());
+        }
+        if(withEncoderVelocity && alphaOut.size() != rjo.size())
+        {
+          alphaOut.resize(rjo.size());
+        }
         LOG_INFO("[MCUDPControl] Init duration " << init_dt.count())
         sensorsClient.init();
         controlClient.init();
@@ -316,14 +328,6 @@ int main(int argc, char * argv[])
           const auto & rjo = controller.ref_joint_order();
           auto & qOut = controlClient.control().encoders;
           auto & alphaOut = controlClient.control().encoderVelocities;
-          if(qOut.size() != rjo.size())
-          {
-            qOut.resize(rjo.size());
-          }
-          if(withEncoderVelocity && alphaOut.size() != rjo.size())
-          {
-            alphaOut.resize(rjo.size());
-          }
           for(size_t i = 0; i < rjo.size(); ++i)
           {
             const auto & jN = rjo[i];
