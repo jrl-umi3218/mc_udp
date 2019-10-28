@@ -69,6 +69,9 @@ int main(int argc, char * argv[])
   /** Whether encoder desired velocities should be sent */
   bool withEncoderVelocity = false;
 
+  /** Whether to use one or two client(s) */
+  bool singleClient = false;
+
   po::options_description desc("MCUDPControl options");
   // clang-format off
   desc.add_options()
@@ -76,7 +79,8 @@ int main(int argc, char * argv[])
     ("encoderVelocity", "Send/receive encoder velocities")
     ("host,h", po::value<std::string>(&host), "Connection host")
     ("port,p", po::value<int>(&port), "Connection port")
-    ("conf,f", po::value<std::string>(&conf_file), "Configuration file");
+    ("conf,f", po::value<std::string>(&conf_file), "Configuration file")
+    ("single,s", "Use a single client");
   // clang-format on
 
   po::variables_map vm;
@@ -95,6 +99,11 @@ int main(int argc, char * argv[])
     withEncoderVelocity = true;
   }
 
+  if(vm.count("single"))
+  {
+    singleClient = true;
+  }
+
   mc_control::MCGlobalController::GlobalConfiguration gconfig(conf_file, nullptr);
   auto config = gconfig.config;
   if(!config.has("UDP"))
@@ -105,10 +114,22 @@ int main(int argc, char * argv[])
   updateConfig(config, vm, "host", host);
   updateConfig(config, vm, "port", port);
   mc_control::MCGlobalController controller(gconfig);
-  LOG_INFO("Connecting UDP sensors client to " << host << ":" << port)
+  if(singleClient)
+  {
+    LOG_INFO("Connect UDP client to " << host << ":" << port)
+  }
+  else
+  {
+    LOG_INFO("Connecting UDP sensors client to " << host << ":" << port)
+  }
   mc_udp::Client sensorsClient(host, port);
-  LOG_INFO("Connecting UDP control client to " << host << ":" << port + 1)
-  mc_udp::Client controlClient(host, port + 1);
+  mc_udp::Client * controlClientPtr = &sensorsClient;
+  if(!singleClient)
+  {
+    LOG_INFO("Connecting UDP control client to " << host << ":" << port + 1)
+    controlClientPtr = new mc_udp::Client(host, port + 1);
+  }
+  mc_udp::Client & controlClient = *controlClientPtr;
   bool init = false;
   // RTC port to robot force sensors
   std::unordered_map<std::string, std::string> fsensors;
@@ -312,7 +333,10 @@ int main(int argc, char * argv[])
         }
         LOG_INFO("[MCUDPControl] Init duration " << init_dt.count())
         sensorsClient.init();
-        controlClient.init();
+        if(!singleClient)
+        {
+          controlClient.init();
+        }
       }
       else
       {
