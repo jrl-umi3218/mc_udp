@@ -375,9 +375,12 @@ int main(int argc, char * argv[])
           {
             qOut[j.first] = j.second;
           }
-          for(const auto & j : ignoredVelocities)
+          if(withEncoderVelocity)
           {
-            alphaOut[j.first] = j.second;
+            for(const auto & j : ignoredVelocities)
+            {
+              alphaOut[j.first] = j.second;
+            }
           }
 
           auto gripperQOut = controller.gripperQ();
