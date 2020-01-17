@@ -3,7 +3,7 @@ set(client_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Client.cpp")
 
 add_library(mc_udp_client SHARED ${client_SRC} ${client_HDR})
 set_target_properties(mc_udp_client PROPERTIES EXPORT_NAME client)
-target_link_libraries(mc_udp_client PUBLIC mc_udp_data -lpthread)
+target_link_libraries(mc_udp_client PUBLIC mc_udp_data)
 
 install(
   TARGETS mc_udp_client
@@ -27,7 +27,7 @@ endif()
 if(${BUILD_MC_RTC_CLIENT})
 find_package(mc_rtc)
   if(${mc_rtc_FOUND})
-    find_package(Boost REQUIRED COMPONENTS program_options)
+    find_package(Boost REQUIRED COMPONENTS program_options thread)
 
       set(MCUDPControl_SRC
         MCUDPControl.cpp
