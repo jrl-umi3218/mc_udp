@@ -27,7 +27,7 @@ endif()
 if(${BUILD_MC_RTC_CLIENT})
 find_package(mc_rtc)
   if(${mc_rtc_FOUND})
-    find_package(Boost REQUIRED COMPONENTS program_options)
+    find_package(Boost REQUIRED COMPONENTS program_options thread)
 
       set(MCUDPControl_SRC
         MCUDPControl.cpp
