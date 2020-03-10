@@ -16,3 +16,5 @@ install(
   FILES "${CMAKE_SOURCE_DIR}/mc_udpConfig.cmake"
   DESTINATION lib/cmake/mc_udp
 )
+
+enable_testing()
