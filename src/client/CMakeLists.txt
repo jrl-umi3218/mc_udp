@@ -1,3 +1,7 @@
+#
+# Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
+#
+
 set(client_HDR "${include_DIR}/client/Client.h")
 set(client_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Client.cpp")
 

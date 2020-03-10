@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
+ */
+
 #include <mc_udp/client/Client.h>
 #include <mc_udp/data/Hello.h>
 #include <mc_udp/data/Init.h>

@@ -1,6 +1,9 @@
 mc\_rtc UDP-based client/server
 ==
 
+[![License](https://img.shields.io/badge/License-BSD%202--Clause-green.svg)](https://opensource.org/licenses/BSD-2-Clause)
+[![CI](https://github.com/jrl-umi3218/mc_udp/workflows/CI%20of%20mc_udp/badge.svg)](https://github.com/jrl-umi3218/mc_udp/actions)
+
 You don't need to build both the client and server(s) on the same machine, the project will build what it can.
 
 Client

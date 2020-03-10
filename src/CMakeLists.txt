@@ -1,3 +1,7 @@
+#
+# Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
+#
+
 set(include_DIR "${PROJECT_SOURCE_DIR}/include/mc_udp")
 
 set(data_SRC

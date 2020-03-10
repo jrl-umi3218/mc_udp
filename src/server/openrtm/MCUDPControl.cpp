@@ -4,6 +4,11 @@
  *
  * $Id$
  */
+
+/*
+ * Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
+ */
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"

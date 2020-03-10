@@ -1,3 +1,7 @@
+/*
+ * Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
+ */
+
 #pragma once
 
 #include <string>

@@ -1,3 +1,7 @@
+#
+# Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
+#
+
 set(server_HDR
   "${include_DIR}/server/Server.h"
 )

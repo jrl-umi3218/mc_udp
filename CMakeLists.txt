@@ -1,3 +1,7 @@
+#
+# Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
+#
+
 cmake_minimum_required(VERSION 3.1) # Minimum required by recent mc_rtc
 
 project(mc_udp CXX)
