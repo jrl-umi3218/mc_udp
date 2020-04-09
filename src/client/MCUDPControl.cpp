@@ -153,38 +153,6 @@ int main(int argc, char * argv[])
     }
     return -1;
   };
-  auto gripperIndex = [&](const std::vector<std::string> & joints) {
-    std::vector<int> gIndex;
-    for(const auto & j : joints)
-    {
-      gIndex.push_back(refIndex(j));
-    }
-    return gIndex;
-  };
-  std::map<std::string, std::vector<int>> grippers;
-  std::map<std::string, std::vector<int>> grippersAll;
-  std::map<std::string, std::vector<double>> gripperState;
-  for(const auto & g : controller.gripperActiveJoints())
-  {
-    grippers[g.first] = gripperIndex(g.second);
-    gripperState[g.first].resize(g.second.size());
-  }
-  for(const auto & g : controller.gripperJoints())
-  {
-    grippersAll[g.first] = gripperIndex(g.second);
-  }
-  auto updateGripperState = [&](const std::vector<double> & qIn) {
-    for(auto & g : gripperState)
-    {
-      for(size_t i = 0; i < g.second.size(); ++i)
-      {
-        if(qIn[grippers[g.first][i]] != -1)
-        {
-          g.second[i] = qIn[grippers[g.first][i]];
-        }
-      }
-    }
-  };
   std::map<size_t, double> ignoredJoints;
   std::map<size_t, double> ignoredVelocities;
   if(config.has("IgnoredJoints"))
@@ -309,17 +277,10 @@ int main(int argc, char * argv[])
         wrenches[fsensors.at(fs.name)] = sva::ForceVecd(reading);
       }
       controller.setWrenches(wrenches);
-      updateGripperState(sensorsClient.sensors().encoders);
-      controller.setActualGripperQ(gripperState);
       if(!init)
       {
         auto init_start = clock::now();
         controller.init(qIn);
-        controller.setGripperCurrentQ(gripperState);
-        for(const auto & g : gripperState)
-        {
-          controller.setGripperTargetQ(g.first, g.second);
-        }
         controller.running = true;
         init = true;
         auto init_end = clock::now();
@@ -384,18 +345,6 @@ int main(int argc, char * argv[])
             for(const auto & j : ignoredVelocities)
             {
               alphaOut[j.first] = j.second;
-            }
-          }
-
-          auto gripperQOut = controller.gripperQ();
-          for(const auto & g : grippersAll)
-          {
-            for(size_t i = 0; i < g.second.size(); ++i)
-            {
-              if(g.second[i] != -1)
-              {
-                qOut[g.second[i]] = gripperQOut[g.first][i];
-              }
             }
           }
           controlClient.control().id = sensorsClient.sensors().id;
