@@ -44,6 +44,7 @@ static const char* mccontrol_spec[] =
     // Configuration variables
     "conf.default.is_enabled", "0",
     "conf.default.port", "4445",
+    "conf.default.robot", "NOT_SET",
     ""
   };
 // </rtc-template>
@@ -74,6 +75,7 @@ RTC::ReturnCode_t MCUDPControl::onInitialize()
   // Bind variables and configuration variable
   bindParameter("is_enabled", m_enabled, "0");
   bindParameter("port", port, "4445");
+  bindParameter("robot", robot_, "NOT_SET");
 
   MC_UDP_INFO("MCUDPControl::onInitialize() finished")
   return RTC::RTC_OK;
@@ -107,7 +109,8 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
     server_.send();
     if(server_.recv())
     {
-      m_qOut.data.length(server_.control().encoders.size());
+      auto & control = server_.control().messages.at(robot_);
+      m_qOut.data.length(control.encoders.size());
       got_control_ = true;
       if(control_lost_)
       {
@@ -117,7 +120,7 @@ RTC::ReturnCode_t MCUDPControl::onExecute(RTC::UniqueId ec_id)
       control_lost_ = false;
       for(unsigned int i = 0; i < m_qOut.data.length(); ++i)
       {
-        m_qOut.data[i] = server_.control().encoders[i];
+        m_qOut.data[i] = control.encoders[i];
       }
       m_qOut.tm = tm;
       m_qOutOut.write();

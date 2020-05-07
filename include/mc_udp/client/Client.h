@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <mc_udp/data/RobotControl.h>
-#include <mc_udp/data/RobotSensors.h>
+#include <mc_udp/data/MultiRobotMessage.h>
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -48,19 +47,19 @@ struct Client
    */
   void send();
 
-  inline RobotControl & control()
+  inline MultiRobotControl & control()
   {
     return control_;
   }
 
-  inline const RobotSensors & sensors() const
+  inline const MultiRobotSensors & sensors() const
   {
     return sensors_;
   }
 
 private:
-  RobotControl control_;
-  RobotSensors sensors_;
+  MultiRobotControl control_;
+  MultiRobotSensors sensors_;
   int socket_;
   sockaddr_in server_;
   std::vector<uint8_t> recvData_;

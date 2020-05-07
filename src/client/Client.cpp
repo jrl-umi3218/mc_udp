@@ -51,7 +51,7 @@ bool Client::recv()
       if(sz > 0)
       {
         sensors_.fromBuffer(recvData_.data());
-        MC_UDP_INFO("Had more data waiting reception " << sensors_.id)
+        MC_UDP_INFO("Had more data waiting reception " << sensors_.messages.begin()->second.id)
       }
     } while(sz > 0);
     return true;

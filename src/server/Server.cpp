@@ -41,7 +41,10 @@ bool Server::recv()
     else if(length == sizeof(Init) * sizeof(uint8_t))
     {
       MC_UDP_INFO(id_ << " Start streaming data to client")
-      sensors().id = 0;
+      for(auto & m : sensors().messages)
+      {
+        m.second.id = 0;
+      }
       initClient_ = false;
     }
     else if(length >= static_cast<int>(recvData_.size()))

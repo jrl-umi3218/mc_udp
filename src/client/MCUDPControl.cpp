@@ -219,7 +219,7 @@ int main(int argc, char * argv[])
     if(sensorsClient.recv())
     {
       auto start = clock::now();
-      auto & sc = sensorsClient.sensors();
+      auto & sc = sensorsClient.sensors().messages.at(controller.robot().name());
       qIn = sc.encoders;
       alphaIn = sc.encoderVelocities;
 
@@ -241,19 +241,16 @@ int main(int argc, char * argv[])
 
       controller.setJointTorques(sc.torques);
       Eigen::Vector3d rpy;
-      rpy << sensorsClient.sensors().orientation[0], sensorsClient.sensors().orientation[1],
-          sensorsClient.sensors().orientation[2];
+      rpy << sc.orientation[0], sc.orientation[1], sc.orientation[2];
       controller.setSensorOrientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(rpy)));
       Eigen::Vector3d pos;
       pos << sc.position[0], sc.position[1], sc.position[2];
       controller.setSensorPosition(pos);
       Eigen::Vector3d vel;
-      vel << sensorsClient.sensors().angularVelocity[0], sensorsClient.sensors().angularVelocity[1],
-          sensorsClient.sensors().angularVelocity[2];
+      vel << sc.angularVelocity[0], sc.angularVelocity[1], sc.angularVelocity[2];
       controller.setSensorAngularVelocity(vel);
       Eigen::Vector3d acc;
-      acc << sensorsClient.sensors().linearAcceleration[0], sensorsClient.sensors().linearAcceleration[1],
-          sensorsClient.sensors().linearAcceleration[2];
+      acc << sc.linearAcceleration[0], sc.linearAcceleration[1], sc.linearAcceleration[2];
       controller.setSensorLinearAcceleration(acc);
 
       // Floating base sensor
@@ -291,8 +288,9 @@ int main(int argc, char * argv[])
         auto init_end = clock::now();
         duration_ms init_dt = init_end - init_start;
         const auto & rjo = controller.ref_joint_order();
-        auto & qOut = controlClient.control().encoders;
-        auto & alphaOut = controlClient.control().encoderVelocities;
+        auto & cc = controlClient.control().messages[controller.robot().name()];
+        auto & qOut = cc.encoders;
+        auto & alphaOut = cc.encoderVelocities;
         if(qOut.size() != rjo.size())
         {
           qOut.resize(rjo.size());
@@ -312,16 +310,22 @@ int main(int argc, char * argv[])
       {
         if(prev_id + 1 != sc.id)
         {
+<<<<<<< HEAD
           mc_rtc::log::warning("[MCUDPControl] Missed one or more sensors reading (previous id: {}, current id: {})",
                                prev_id, sensorsClient.sensors().id);
+=======
+          LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: " << prev_id << ", current id: "
+                                                                                         << sc.id << ")")
+>>>>>>> Use MultiRobotMessage instead of single robot
         }
         if(controller.run())
         {
           const auto & robot = controller.robot();
           const auto & mbc = robot.mbc();
           const auto & rjo = controller.ref_joint_order();
-          auto & qOut = controlClient.control().encoders;
-          auto & alphaOut = controlClient.control().encoderVelocities;
+          auto & cc = controlClient.control().messages[controller.robot().name()];
+          auto & qOut = cc.encoders;
+          auto & alphaOut = cc.encoderVelocities;
           for(size_t i = 0; i < rjo.size(); ++i)
           {
             const auto & jN = rjo[i];
@@ -352,7 +356,7 @@ int main(int argc, char * argv[])
               alphaOut[j.first] = j.second;
             }
           }
-          controlClient.control().id = sensorsClient.sensors().id;
+          cc.id = sc.id;
           controlClient.send();
         }
       }
