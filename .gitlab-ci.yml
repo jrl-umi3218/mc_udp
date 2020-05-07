@@ -1,9 +1,9 @@
 variables:
   CI_TOOL: gitlab-ci
-  APT_DEPENDENCIES: "libtinyxml2-dev libboost-all-dev libgeos++-dev libgeos-dev libltdl-dev libtasks-qld-dev hrpsys-base liblapack-dev libblas-dev libjpeg-dev libpng12-dev libmc-rbdyn-urdf-dev"
-  GIT_DEPENDENCIES: "nanomsg/nanomsg git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data humanoid-path-planner/hpp-spline jbeder/yaml-cpp jrl-umi3218/eigen-quadprog git@gite.lirmm.fr:multi-contact/mc_rtc"
+  APT_DEPENDENCIES: "libtinyxml2-dev libboost-all-dev libgeos++-dev libgeos-dev libltdl-dev hrpsys-base liblapack-dev libblas-dev libjpeg-dev libpng12-dev"
+  GIT_DEPENDENCIES: "jbeder/yaml-cpp jrl-umi3218/Eigen3ToPython jrl-umi3218/SpaceVecAlg jrl-umi3218/RBDyn jrl-umi3218/eigen-qld git@gite.lirmm.fr:multi-contact/eigen-lssol.git jrl-umi3218/eigen-quadprog jrl-umi3218/sch-core jrl-umi3218/Tasks jrl-umi3218/mc_rbdyn_urdf nanomsg/nanomsg humanoid-path-planner/hpp-spline#v4.8.1 jrl-umi3218/mc_rtc_data jrl-umi3218/mc_rtc"
   MASTER_PPA: "hrg/daily"
-  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF -DBUILD_PYTHON_INTERFACE:BOOL=OFF -DYAML_BUILD_SHARED_LIBS:BOOL=ON"
+  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF -DBUILD_PYTHON_INTERFACE:BOOL=OFF -DYAML_BUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo"
   # No test in this package
   ALLOW_TESTSUITE_FAILURE: "true"
 
