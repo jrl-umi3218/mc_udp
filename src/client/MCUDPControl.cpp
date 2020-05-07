@@ -4,6 +4,7 @@
 
 #include <mc_control/mc_global_controller.h>
 #include <mc_rbdyn/rpy_utils.h>
+#include <mc_rtc/version.h>
 #include <mc_udp/client/Client.h>
 
 #include <boost/program_options.hpp>
@@ -106,6 +107,13 @@ int main(int argc, char * argv[])
   if(vm.count("single"))
   {
     singleClient = true;
+  }
+
+  if(mc_rtc::MC_RTC_VERSION != mc_rtc::version())
+  {
+    LOG_ERROR("mc_rtc_ticker was compiled with "
+              << mc_rtc::MC_RTC_VERSION << " but mc_rtc is at version " << mc_rtc::version()
+              << ", you might face subtle issues or unexpected crashes, please recompile mc_rtc_ticker")
   }
 
   mc_control::MCGlobalController::GlobalConfiguration gconfig(conf_file, nullptr);
