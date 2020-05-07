@@ -12,6 +12,7 @@ set(data_SRC
 set(data_HDR
   "${include_DIR}/data/RobotSensors.h"
   "${include_DIR}/data/RobotControl.h"
+  "${include_DIR}/data/utils.h"
   "${include_DIR}/logging.h"
 )
 

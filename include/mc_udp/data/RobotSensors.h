@@ -52,10 +52,14 @@ struct RobotSensors
 
   /** Compute required buffer size */
   size_t size() const;
-  /** Fill pre-allocated buffer, must be of (at-least) size() */
-  void toBuffer(uint8_t * buffer) const;
-  /** Fill from a provided buffer */
-  void fromBuffer(uint8_t * buffer);
+  /** Fill pre-allocated buffer, must be of (at-least) size()
+   *
+   * Returns the number of bytes written */
+  size_t toBuffer(uint8_t * buffer) const;
+  /** Fill from a provided buffer
+   *
+   * Returns the number of bytes consumed */
+  size_t fromBuffer(uint8_t * buffer);
 
 private:
   /** Size of required buffer size for force sensors */

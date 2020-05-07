@@ -3,6 +3,7 @@
  */
 
 #include <mc_udp/data/RobotSensors.h>
+#include <mc_udp/data/utils.h>
 
 #include <cstring>
 
@@ -63,105 +64,85 @@ size_t RobotSensors::fsensorsSize() const
   return ret;
 }
 
-namespace
+namespace utils
 {
 
-void memcpy_advance(uint8_t * dest, const void * src, size_t n, size_t & offset)
+static void toBuffer(uint8_t * dest, const ForceSensor & src, size_t & offset)
 {
-  std::memcpy(dest + offset, src, n);
-  offset += n;
+  toBuffer(dest, src.name, offset);
+  memcpy_advance(dest, src.reading, 6 * sizeof(double), offset);
 }
 
-} // namespace
+static void toBuffer(uint8_t * dest, const std::vector<ForceSensor> & src, size_t & offset)
+{
+  uint64_t size = src.size();
+  memcpy_advance(dest, &size, sizeof(uint64_t), offset);
+  for(const auto & fs : src)
+  {
+    toBuffer(dest, fs, offset);
+  }
+}
 
-void RobotSensors::toBuffer(uint8_t * buffer) const
+}
+
+size_t RobotSensors::toBuffer(uint8_t * buffer) const
 {
   size_t offset = 0;
-  uint64_t tmp = 0; // temporary to store size
+  utils::memcpy_advance(buffer, &id, sizeof(uint64_t), offset);
+  utils::toBuffer(buffer, encoders, offset);
+  utils::toBuffer(buffer, encoderVelocities, offset);
+  utils::toBuffer(buffer, torques, offset);
+  utils::toBuffer(buffer, fsensors, offset);
+  utils::memcpy_advance(buffer, orientation, 3 * sizeof(double), offset);
+  utils::memcpy_advance(buffer, angularVelocity, 3 * sizeof(double), offset);
+  utils::memcpy_advance(buffer, linearAcceleration, 3 * sizeof(double), offset);
+  utils::memcpy_advance(buffer, position, 3 * sizeof(double), offset);
+  utils::memcpy_advance(buffer, floatingBasePos, 3 * sizeof(double), offset);
+  utils::memcpy_advance(buffer, floatingBaseRPY, 3 * sizeof(double), offset);
+  utils::memcpy_advance(buffer, floatingBaseVel, 6 * sizeof(double), offset);
+  utils::memcpy_advance(buffer, floatingBaseAcc, 6 * sizeof(double), offset);
+  return offset;
+}
 
-  memcpy_advance(buffer, &id, sizeof(uint64_t), offset);
+namespace utils
+{
 
-  tmp = encoders.size();
-  memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
-  memcpy_advance(buffer, encoders.data(), encoders.size() * sizeof(double), offset);
+static void fromBuffer(ForceSensor & dest, const uint8_t * src, size_t & offset)
+{
+  fromBuffer(dest.name, src, offset);
+  memcpy_advance(dest.reading, src, 6 * sizeof(double), offset);
+}
 
-  tmp = encoderVelocities.size();
-  memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
-  memcpy_advance(buffer, encoderVelocities.data(), encoderVelocities.size() * sizeof(double), offset);
-
-  tmp = torques.size();
-  memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
-  memcpy_advance(buffer, torques.data(), torques.size() * sizeof(double), offset);
-
-  tmp = fsensors.size();
-  memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
-  for(size_t i = 0; i < fsensors.size(); ++i)
+static void fromBuffer(std::vector<ForceSensor> & dest, const uint8_t * src, size_t & offset)
+{
+  uint64_t size = 0;
+  memcpy_advance(&size, src, sizeof(uint64_t), offset);
+  dest.resize(size);
+  for(auto & fs : dest)
   {
-    auto & fs = fsensors[i];
-    tmp = fs.name.size();
-    memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
-    memcpy_advance(buffer, fs.name.c_str(), fs.name.size() * sizeof(char), offset);
-    memcpy_advance(buffer, fs.reading, 6 * sizeof(double), offset);
+    fromBuffer(fs, src, offset);
   }
-  memcpy_advance(buffer, orientation, 3 * sizeof(double), offset);
-  memcpy_advance(buffer, angularVelocity, 3 * sizeof(double), offset);
-  memcpy_advance(buffer, linearAcceleration, 3 * sizeof(double), offset);
-  memcpy_advance(buffer, position, 3 * sizeof(double), offset);
-  memcpy_advance(buffer, floatingBasePos, 3 * sizeof(double), offset);
-  memcpy_advance(buffer, floatingBaseRPY, 3 * sizeof(double), offset);
-  memcpy_advance(buffer, floatingBaseVel, 6 * sizeof(double), offset);
-  memcpy_advance(buffer, floatingBaseAcc, 6 * sizeof(double), offset);
 }
 
-namespace
-{
-
-void memcpy_advance(void * dest, const uint8_t * src, size_t n, size_t & offset)
-{
-  std::memcpy(dest, src + offset, n);
-  offset += n;
 }
 
-} // namespace
-
-void RobotSensors::fromBuffer(uint8_t * buffer)
+size_t RobotSensors::fromBuffer(uint8_t * buffer)
 {
   size_t offset = 0;
-  uint64_t tmp = 0; // temporary to store size
-
-  memcpy_advance(&id, buffer, sizeof(uint64_t), offset);
-
-  memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
-  encoders.resize(tmp);
-  memcpy_advance(encoders.data(), buffer, tmp * sizeof(double), offset);
-
-  memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
-  encoderVelocities.resize(tmp);
-  memcpy_advance(encoderVelocities.data(), buffer, tmp * sizeof(double), offset);
-
-  memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
-  torques.resize(tmp);
-  memcpy_advance(torques.data(), buffer, tmp * sizeof(double), offset);
-
-  memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
-  fsensors.resize(tmp);
-  for(size_t i = 0; i < fsensors.size(); ++i)
-  {
-    auto & fs = fsensors[i];
-    tmp = fs.name.size();
-    memcpy_advance(&tmp, buffer, sizeof(uint64_t), offset);
-    fs.name.assign(reinterpret_cast<char *>(&buffer[offset]), tmp * sizeof(char));
-    offset += tmp * sizeof(char);
-    memcpy_advance(fs.reading, buffer, 6 * sizeof(double), offset);
-  }
-  memcpy_advance(orientation, buffer, 3 * sizeof(double), offset);
-  memcpy_advance(angularVelocity, buffer, 3 * sizeof(double), offset);
-  memcpy_advance(linearAcceleration, buffer, 3 * sizeof(double), offset);
-  memcpy_advance(position, buffer, 3 * sizeof(double), offset);
-  memcpy_advance(floatingBasePos, buffer, 3 * sizeof(double), offset);
-  memcpy_advance(floatingBaseRPY, buffer, 3 * sizeof(double), offset);
-  memcpy_advance(floatingBaseVel, buffer, 6 * sizeof(double), offset);
-  memcpy_advance(floatingBaseAcc, buffer, 6 * sizeof(double), offset);
+  utils::memcpy_advance(&id, buffer, sizeof(uint64_t), offset);
+  utils::fromBuffer(encoders, buffer, offset);
+  utils::fromBuffer(encoderVelocities, buffer, offset);
+  utils::fromBuffer(torques, buffer, offset);
+  utils::fromBuffer(fsensors, buffer, offset);
+  utils::memcpy_advance(orientation, buffer, 3 * sizeof(double), offset);
+  utils::memcpy_advance(angularVelocity, buffer, 3 * sizeof(double), offset);
+  utils::memcpy_advance(linearAcceleration, buffer, 3 * sizeof(double), offset);
+  utils::memcpy_advance(position, buffer, 3 * sizeof(double), offset);
+  utils::memcpy_advance(floatingBasePos, buffer, 3 * sizeof(double), offset);
+  utils::memcpy_advance(floatingBaseRPY, buffer, 3 * sizeof(double), offset);
+  utils::memcpy_advance(floatingBaseVel, buffer, 6 * sizeof(double), offset);
+  utils::memcpy_advance(floatingBaseAcc, buffer, 6 * sizeof(double), offset);
+  return offset;
 }
 
 } // namespace mc_udp
