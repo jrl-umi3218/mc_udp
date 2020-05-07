@@ -10,6 +10,8 @@ set(data_SRC
 )
 
 set(data_HDR
+  "${include_DIR}/data/MultiRobotMessage.h"
+  "${include_DIR}/data/MultiRobotMessage.hpp"
   "${include_DIR}/data/RobotSensors.h"
   "${include_DIR}/data/RobotControl.h"
   "${include_DIR}/data/utils.h"
