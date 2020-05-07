@@ -83,7 +83,7 @@ static void toBuffer(uint8_t * dest, const std::vector<ForceSensor> & src, size_
   }
 }
 
-}
+} // namespace utils
 
 size_t RobotSensors::toBuffer(uint8_t * buffer) const
 {
@@ -124,7 +124,7 @@ static void fromBuffer(std::vector<ForceSensor> & dest, const uint8_t * src, siz
   }
 }
 
-}
+} // namespace utils
 
 size_t RobotSensors::fromBuffer(uint8_t * buffer)
 {

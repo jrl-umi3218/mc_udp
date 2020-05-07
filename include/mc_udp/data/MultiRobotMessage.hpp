@@ -12,12 +12,12 @@ size_t MultiRobotMessage<MsgT>::size() const
   for(const auto & m : messages)
   {
     ret +=
-      // Length of robot name
-      sizeof(uint64_t) +
-      // Name data
-      m.first.size() * sizeof(char) +
-      // Length of message for that robot
-      m.second.size();
+        // Length of robot name
+        sizeof(uint64_t) +
+        // Name data
+        m.first.size() * sizeof(char) +
+        // Length of message for that robot
+        m.second.size();
   }
   return ret;
 }

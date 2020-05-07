@@ -310,13 +310,8 @@ int main(int argc, char * argv[])
       {
         if(prev_id + 1 != sc.id)
         {
-<<<<<<< HEAD
           mc_rtc::log::warning("[MCUDPControl] Missed one or more sensors reading (previous id: {}, current id: {})",
-                               prev_id, sensorsClient.sensors().id);
-=======
-          LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: " << prev_id << ", current id: "
-                                                                                         << sc.id << ")")
->>>>>>> Use MultiRobotMessage instead of single robot
+                               prev_id, sc.id);
         }
         if(controller.run())
         {
