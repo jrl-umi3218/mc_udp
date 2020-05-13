@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <mc_udp/data/api.h>
+
 #include <string>
 #include <vector>
 
@@ -11,14 +13,14 @@ namespace mc_udp
 {
 
 /** Represent a force sensor reading */
-struct ForceSensor
+struct MC_UDP_DATA_DLLAPI ForceSensor
 {
   std::string name;
   double reading[6];
 };
 
 /** Robot sensors' data provided by the server */
-struct RobotSensors
+struct MC_UDP_DATA_DLLAPI RobotSensors
 {
   /** Unique identifier for the reading */
   uint64_t id;

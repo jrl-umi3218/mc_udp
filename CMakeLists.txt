@@ -12,8 +12,6 @@ option(BUILD_OPENRTM_SERVER "Build OpenRTM server component" ON)
 option(BUILD_DUMMY_CLIENT "Build dummy client" OFF)
 option(BUILD_DUMMY_SERVER "Build dummy server" OFF)
 
-find_package(PkgConfig REQUIRED)
-
 add_subdirectory(src)
 
 install(

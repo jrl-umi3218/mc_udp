@@ -4,10 +4,17 @@
 
 #pragma once
 
-#include <mc_udp/data/MultiRobotMessage.h>
+#ifndef WIN32
+#  include <netinet/in.h>
+#  include <sys/socket.h>
+#else
+#  include <WS2tcpip.h>
+#  include <WinSock2.h>
+#  pragma comment(lib, "ws2_32.lib")
+#endif
 
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <mc_udp/data/MultiRobotMessage.h>
+#include <mc_udp/server/api.h>
 
 namespace mc_udp
 {
@@ -19,7 +26,7 @@ namespace mc_udp
  *  sensors' and control data is left to clients of this class
  *
  */
-struct Server
+struct MC_UDP_SERVER_DLLAPI Server
 {
   /** Create a non-working server
    *
@@ -78,6 +85,9 @@ private:
   bool initClient_;
   bool waitInit_;
   std::string id_;
+#ifdef WIN32
+  WSAData wsaData_;
+#endif
 };
 
 } // namespace mc_udp

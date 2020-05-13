@@ -2,6 +2,8 @@
 # Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
 #
 
+find_package(PkgConfig REQUIRED)
+
 pkg_check_modules(HRPSYS_BASE hrpsys-base)
 
 macro(build_rtc_component NAME)

@@ -18,19 +18,26 @@ int main(int argc, char * argv[])
     port = std::atoi(argv[2]);
   }
   mc_udp::Client client(host, port);
-  auto & control = client.control();
+  auto & control = client.control().messages["dummy"];
   control.encoders = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
   uint64_t prev_id = 0;
+  bool init = false;
   while(1)
   {
     if(client.recv())
     {
-      if(client.sensors().id != prev_id + 1)
+      if(!init)
       {
-        MC_UDP_WARNING("[dummy] Missed one frame of sensors data (id: " << client.sensors().id
-                                                                        << ", previous id: " << prev_id << ")")
+        init = true;
+        client.init();
       }
-      control.id = client.sensors().id;
+      const auto & sensors = client.sensors().messages.at("dummy");
+      if(sensors.id != prev_id + 1)
+      {
+        MC_UDP_WARNING("[dummy] Missed one frame of sensors data (id: " << sensors.id << ", previous id: " << prev_id
+                                                                        << ")")
+      }
+      control.id = sensors.id;
       prev_id = control.id;
       // for(const auto & fs : client.sensors().fsensors)
       //{
@@ -41,6 +48,7 @@ int main(int argc, char * argv[])
       //                                       << fs.reading[4] << ", "
       //                                       << fs.reading[5] << "\n";
       //}
+      std::cout << "sensors.id: " << sensors.id << "\n";
       client.send();
     }
   }

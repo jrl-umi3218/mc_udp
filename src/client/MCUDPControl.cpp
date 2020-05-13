@@ -2,10 +2,11 @@
  * Copyright 2019-2020 CNRS-UM LIRMM, CNRS-AIST JRL
  */
 
+#include <mc_udp/client/Client.h>
+
 #include <mc_control/mc_global_controller.h>
 #include <mc_rbdyn/rpy_utils.h>
 #include <mc_rtc/version.h>
-#include <mc_udp/client/Client.h>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
