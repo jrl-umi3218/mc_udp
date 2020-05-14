@@ -32,9 +32,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-16.04, ubuntu-18.04]
+        os: [ubuntu-16.04, ubuntu-18.04, macos-latest, windows-latest]
         compiler: [gcc,clang]
         build-type: [Release, RelWithDebInfo]
+        exclude:
+          # Only default compiler on macos-latest and windows-latest
+          - os: macos-latest
+            compiler: clang
+          - os: windows-latest
+            compiler: clang
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -61,11 +67,60 @@ jobs:
         build-type: ${{ matrix.build-type }}
         ubuntu: |
           apt: hrpsys-base libmc-rtc-dev
+        macos: |
+          cask: gfortran
+          brew: eigen boost tinyxml2 geos nanomsg yaml-cpp pkg-config libtool
+          pip: Cython coverage nose numpy
+          options: -DPYTHON_BINDING:BOOL=OFF
+          github:
+            - path: humanoid-path-planner/hpp-spline
+              ref: v4.7.0
+              options: -DBUILD_PYTHON_INTERFACE:BOOL=OFF
+            - path: jrl-umi3218/SpaceVecAlg
+            - path: jrl-umi3218/sch-core
+            - path: jrl-umi3218/eigen-qld
+            - path: jrl-umi3218/eigen-quadprog
+            - path: jrl-umi3218/RBDyn
+            - path: jrl-umi3218/Tasks
+            - path: jrl-umi3218/mc_rbdyn_urdf
+            - path: jrl-umi3218/mc_rtc_data
+            - path: jrl-umi3218/mc_rtc
+        windows: |
+          pip: Cython coverage nose numpy
+          options: -DPYTHON_BINDING:BOOL=OFF
+          github:
+            - path: eigenteam/eigen-git-mirror
+              ref: 3.3.7
+            - path: leethomason/tinyxml2
+              ref: 7.1.0
+            - path: libgeos/geos
+              ref: 3.8.1
+              options: -DBUILD_TESTING:BOOL=ON
+            - path: nanomsg/nanomsg
+              ref: 1.1.5
+            - path: jbeder/yaml-cpp
+              ref: 29dcf92f870ee51cce8d68f8fcfe228942e8dfe1
+              options: -DYAML_CPP_BUILD_TESTS:BOOL=OFF
+            - path: humanoid-path-planner/hpp-spline
+              ref: v4.7.0
+              options: -DBUILD_PYTHON_INTERFACE:BOOL=OFF
+            - path: jrl-umi3218/SpaceVecAlg
+            - path: jrl-umi3218/sch-core
+            - path: jrl-umi3218/eigen-qld
+            - path: jrl-umi3218/eigen-quadprog
+            - path: jrl-umi3218/RBDyn
+            - path: jrl-umi3218/Tasks
+            - path: jrl-umi3218/mc_rbdyn_urdf
+            - path: jrl-umi3218/mc_rtc_data
+            - path: jrl-umi3218/mc_rtc
     - name: Build and test
       uses: jrl-umi3218/github-actions/build-cmake-project@master
       with:
         compiler: ${{ matrix.compiler }}
         build-type: ${{ matrix.build-type }}
+        options: -DBUILD_DUMMY_SERVER:BOOL=ON -DBUILD_DUMMY_CLIENT:BOOL=ON
+        macos-options: -DBUILD_OPENRTM_SERVER:BOOL=OFF
+        windows-options: -DBUILD_OPENRTM_SERVER:BOOL=OFF
     - name: Slack Notification
       if: failure()
       uses: archive/github-actions-slack@master
