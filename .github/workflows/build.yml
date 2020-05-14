@@ -66,11 +66,11 @@ jobs:
         compiler: ${{ matrix.compiler }}
         build-type: ${{ matrix.build-type }}
         ubuntu: |
-          apt: hrpsys-base libmc-rtc-dev
+          apt: cython python-setuptools cython3 python3-setuptools python-dev python3-dev libpython2.7-dev libpython3-dev hrpsys-base libmc-rtc-dev
         macos: |
           cask: gfortran
           brew: eigen boost tinyxml2 geos nanomsg yaml-cpp pkg-config libtool
-          pip: Cython coverage nose numpy
+          pip: Cython
           options: -DPYTHON_BINDING:BOOL=OFF
           github:
             - path: humanoid-path-planner/hpp-spline
@@ -86,7 +86,7 @@ jobs:
             - path: jrl-umi3218/mc_rtc_data
             - path: jrl-umi3218/mc_rtc
         windows: |
-          pip: Cython coverage nose numpy
+          pip: Cython
           options: -DPYTHON_BINDING:BOOL=OFF
           github:
             - path: eigenteam/eigen-git-mirror
@@ -119,6 +119,7 @@ jobs:
         compiler: ${{ matrix.compiler }}
         build-type: ${{ matrix.build-type }}
         options: -DBUILD_DUMMY_SERVER:BOOL=ON -DBUILD_DUMMY_CLIENT:BOOL=ON
+        linux-options: -DPYTHON_BINDING_BUILD_PYTHON2_AND_PYTHON3:BOOL=ON
         macos-options: -DBUILD_OPENRTM_SERVER:BOOL=OFF
         windows-options: -DBUILD_OPENRTM_SERVER:BOOL=OFF
     - name: Slack Notification
