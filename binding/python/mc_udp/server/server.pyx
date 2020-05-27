@@ -22,6 +22,8 @@ cdef class Server(object):
         return self.impl.recv()
     def send(self):
         self.impl.send()
+    def stop(self):
+        self.impl.stop()
     def control(self):
         return data.MultiRobotControlFromCRef(self.impl.control())
     def sensors(self):

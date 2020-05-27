@@ -14,5 +14,6 @@ cdef extern from "<mc_udp/server/Server.h>" namespace "mc_udp":
         void restart(int)
         cppbool recv()
         void send()
+        void stop()
         const c_data.MultiRobotControl & control()
         c_data.MultiRobotSensors & sensors()
