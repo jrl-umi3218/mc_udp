@@ -150,7 +150,7 @@ int main(int argc, char * argv[])
   fsensors["lfsensor"] = "LeftFootForceSensor";
   fsensors["rhsensor"] = "RightHandForceSensor";
   fsensors["lhsensor"] = "LeftHandForceSensor";
-  std::map<std::string, sva::ForceVecd> wrenches;
+  std::map<std::string, std::map<std::string, sva::ForceVecd>> robot_wrenches;
   auto refIndex = [&controller](const std::string & jName) {
     const auto & rjo = controller.robot().refJointOrder();
     for(size_t i = 0; i < rjo.size(); ++i)
@@ -220,66 +220,96 @@ int main(int argc, char * argv[])
     if(sensorsClient.recv())
     {
       auto start = clock::now();
-      auto & sc = sensorsClient.sensors().messages.at(controller.robot().name());
-      qIn = sc.encoders;
-      alphaIn = sc.encoderVelocities;
-
-      // Ignore encoder value for ignored joints
-      for(const auto & j : ignoredJoints)
+      const std::string & mainRobotName = controller.robot().name();
+      if(!sensorsClient.sensors().messages.count(mainRobotName))
       {
-        qIn[j.first] = j.second;
+        LOG_ERROR_AND_THROW(std::runtime_error, "Server is not providing sensors message for main robot");
       }
-      if(withEncoderVelocity)
+      for(const auto & msg : sensorsClient.sensors().messages)
       {
-        for(const auto & j : ignoredVelocities)
+        bool isMain = mainRobotName == msg.first;
+        if(!controller.controller().robots().hasRobot(msg.first))
         {
-          alphaIn[j.first] = j.second;
+          LOG_ERROR("Server is providing data for a robot that is not controlled by this controller: \"" << msg.first
+                                                                                                         << "\"");
+          continue;
         }
+        const auto & sensors = msg.second;
+        auto & robot = controller.controller().robots().robot(msg.first);
+        Eigen::Vector3d rpy;
+        rpy << sensors.orientation[0], sensors.orientation[1], sensors.orientation[2];
+        Eigen::Vector3d pos;
+        pos << sensors.position[0], sensors.position[1], sensors.position[2];
+        Eigen::Vector3d vel;
+        vel << sensors.angularVelocity[0], sensors.angularVelocity[1], sensors.angularVelocity[2];
+        Eigen::Vector3d acc;
+        acc << sensors.linearAcceleration[0], sensors.linearAcceleration[1], sensors.linearAcceleration[2];
+        if(isMain)
+        {
+          qIn = sensors.encoders;
+          alphaIn = sensors.encoderVelocities;
+          // Ignore encoder value for ignored joints
+          for(const auto & j : ignoredJoints)
+          {
+            qIn[j.first] = j.second;
+          }
+          if(withEncoderVelocity)
+          {
+            for(const auto & j : ignoredVelocities)
+            {
+              alphaIn[j.first] = j.second;
+            }
+          }
+          controller.setEncoderValues(qIn);
+          controller.setEncoderVelocities(alphaIn);
+          controller.setJointTorques(sensors.torques);
+          controller.setSensorOrientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(rpy)));
+          controller.setSensorPosition(pos);
+          controller.setSensorAngularVelocity(vel);
+          controller.setSensorLinearAcceleration(acc);
+        }
+        else
+        {
+          controller.setEncoderValues(robot.name(), sensors.encoders);
+          controller.setEncoderVelocities(robot.name(), sensors.encoderVelocities);
+          controller.setJointTorques(robot.name(), sensors.torques);
+          controller.setSensorOrientation(robot.name(), Eigen::Quaterniond(mc_rbdyn::rpyToMat(rpy)));
+          controller.setSensorPosition(robot.name(), pos);
+          controller.setSensorAngularVelocity(robot.name(), vel);
+          controller.setSensorLinearAcceleration(robot.name(), acc);
+        }
+        // Floating base sensor
+        if(robot.hasBodySensor("FloatingBase"))
+        {
+          controller.setSensorPositions(
+              robot.name(),
+              {{"FloatingBase", {sensors.floatingBasePos[0], sensors.floatingBasePos[1], sensors.floatingBasePos[2]}}});
+          Eigen::Vector3d fbRPY;
+          controller.setSensorOrientations(
+              robot.name(),
+              {{"FloatingBase",
+                Eigen::Quaterniond(mc_rbdyn::rpyToMat(
+                    {sensors.floatingBaseRPY[0], sensors.floatingBaseRPY[1], sensors.floatingBaseRPY[2]}))}});
+          controller.setSensorAngularVelocities(
+              robot.name(),
+              {{"FloatingBase", {sensors.floatingBaseVel[0], sensors.floatingBaseVel[1], sensors.floatingBaseVel[2]}}});
+          controller.setSensorLinearVelocities(
+              robot.name(),
+              {{"FloatingBase", {sensors.floatingBaseVel[3], sensors.floatingBaseVel[4], sensors.floatingBaseVel[5]}}});
+          controller.setSensorLinearAccelerations(
+              robot.name(),
+              {{"FloatingBase", {sensors.floatingBaseAcc[0], sensors.floatingBaseAcc[1], sensors.floatingBaseAcc[2]}}});
+        }
+        auto & wrenches = robot_wrenches[msg.first];
+        for(const auto & fs : sensors.fsensors)
+        {
+          Eigen::Vector6d reading;
+          reading << fs.reading[3], fs.reading[4], fs.reading[5], fs.reading[0], fs.reading[1], fs.reading[2];
+          wrenches[fsensors.at(fs.name)] = sva::ForceVecd(reading);
+        }
+        controller.setWrenches(robot.name(), wrenches);
       }
-
-      controller.setEncoderValues(qIn);
-      controller.setEncoderVelocities(alphaIn);
-
-      controller.setJointTorques(sc.torques);
-      Eigen::Vector3d rpy;
-      rpy << sc.orientation[0], sc.orientation[1], sc.orientation[2];
-      controller.setSensorOrientation(Eigen::Quaterniond(mc_rbdyn::rpyToMat(rpy)));
-      Eigen::Vector3d pos;
-      pos << sc.position[0], sc.position[1], sc.position[2];
-      controller.setSensorPosition(pos);
-      Eigen::Vector3d vel;
-      vel << sc.angularVelocity[0], sc.angularVelocity[1], sc.angularVelocity[2];
-      controller.setSensorAngularVelocity(vel);
-      Eigen::Vector3d acc;
-      acc << sc.linearAcceleration[0], sc.linearAcceleration[1], sc.linearAcceleration[2];
-      controller.setSensorLinearAcceleration(acc);
-
-      // Floating base sensor
-      if(controller.robot().hasBodySensor("FloatingBase"))
-      {
-        controller.setSensorPositions(
-            {{"FloatingBase", {sc.floatingBasePos[0], sc.floatingBasePos[1], sc.floatingBasePos[2]}}});
-        Eigen::Vector3d fbRPY;
-        controller.setSensorOrientations(
-            {{"FloatingBase", Eigen::Quaterniond(mc_rbdyn::rpyToMat(
-                                  {sc.floatingBaseRPY[0], sc.floatingBaseRPY[1], sc.floatingBaseRPY[2]}))}});
-        controller.setSensorAngularVelocities(
-            {{"FloatingBase", {sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]}}});
-        controller.setSensorLinearVelocities(
-            {{"FloatingBase", {sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]}}});
-        controller.setSensorAngularAccelerations(
-            {{"FloatingBase", {sc.floatingBaseAcc[0], sc.floatingBaseAcc[1], sc.floatingBaseAcc[2]}}});
-        controller.setSensorLinearAccelerations(
-            {{"FloatingBase", {sc.floatingBaseAcc[3], sc.floatingBaseAcc[4], sc.floatingBaseAcc[5]}}});
-      }
-
-      for(const auto & fs : sc.fsensors)
-      {
-        Eigen::Vector6d reading;
-        reading << fs.reading[3], fs.reading[4], fs.reading[5], fs.reading[0], fs.reading[1], fs.reading[2];
-        wrenches[fsensors.at(fs.name)] = sva::ForceVecd(reading);
-      }
-      controller.setWrenches(wrenches);
+      auto & sc = sensorsClient.sensors().messages.at(controller.robot().name());
       if(!init)
       {
         auto init_start = clock::now();
@@ -288,17 +318,24 @@ int main(int argc, char * argv[])
         init = true;
         auto init_end = clock::now();
         duration_ms init_dt = init_end - init_start;
-        const auto & rjo = controller.ref_joint_order();
-        auto & cc = controlClient.control().messages[controller.robot().name()];
-        auto & qOut = cc.encoders;
-        auto & alphaOut = cc.encoderVelocities;
-        if(qOut.size() != rjo.size())
+        for(const auto & robot : controller.controller().robots())
         {
-          qOut.resize(rjo.size());
-        }
-        if(withEncoderVelocity && alphaOut.size() != rjo.size())
-        {
-          alphaOut.resize(rjo.size());
+          const auto & rjo = robot.module().ref_joint_order();
+          if(rjo.size() == 0)
+          {
+            continue;
+          }
+          auto & cc = controlClient.control().messages[robot.name()];
+          auto & qOut = cc.encoders;
+          auto & alphaOut = cc.encoderVelocities;
+          if(qOut.size() != rjo.size())
+          {
+            qOut.resize(rjo.size());
+          }
+          if(withEncoderVelocity && alphaOut.size() != rjo.size())
+          {
+            alphaOut.resize(rjo.size());
+          }
         }
         mc_rtc::log::info("[MCUDPControl] Init duration {}", init_dt.count());
         sensorsClient.init();
@@ -316,43 +353,49 @@ int main(int argc, char * argv[])
         }
         if(controller.run())
         {
-          const auto & robot = controller.robot();
-          const auto & mbc = robot.mbc();
-          const auto & rjo = controller.ref_joint_order();
-          auto & cc = controlClient.control().messages[controller.robot().name()];
-          auto & qOut = cc.encoders;
-          auto & alphaOut = cc.encoderVelocities;
-          for(size_t i = 0; i < rjo.size(); ++i)
+          for(const auto & robot : controller.controller().robots())
           {
-            const auto & jN = rjo[i];
-            if(robot.hasJoint(jN))
+            const auto & rjo = controller.ref_joint_order();
+            if(rjo.size() == 0)
             {
-              auto jIndex = robot.jointIndexByName(jN);
-              if(mbc.q[jIndex].size() == 1)
+              continue;
+            }
+            const auto & mbc = robot.mbc();
+            auto & cc = controlClient.control().messages[robot.name()];
+            auto & qOut = cc.encoders;
+            auto & alphaOut = cc.encoderVelocities;
+            for(size_t i = 0; i < rjo.size(); ++i)
+            {
+              const auto & jN = rjo[i];
+              if(robot.hasJoint(jN))
               {
-                auto jIdx = robot.jointIndexByName(jN);
-                qOut[i] = mbc.q[jIdx][0];
-                if(withEncoderVelocity)
+                auto jIndex = robot.jointIndexByName(jN);
+                if(mbc.q[jIndex].size() == 1)
                 {
-                  alphaOut[i] = mbc.alpha[jIdx][0];
+                  auto jIdx = robot.jointIndexByName(jN);
+                  qOut[i] = mbc.q[jIdx][0];
+                  if(withEncoderVelocity)
+                  {
+                    alphaOut[i] = mbc.alpha[jIdx][0];
+                  }
                 }
               }
             }
-          }
 
-          // Ignore QP output for ignored joints
-          for(const auto & j : ignoredJoints)
-          {
-            qOut[j.first] = j.second;
-          }
-          if(withEncoderVelocity)
-          {
-            for(const auto & j : ignoredVelocities)
+            // Ignore QP output for ignored joints
+            for(const auto & j : ignoredJoints)
             {
-              alphaOut[j.first] = j.second;
+              qOut[j.first] = j.second;
             }
+            if(withEncoderVelocity)
+            {
+              for(const auto & j : ignoredVelocities)
+              {
+                alphaOut[j.first] = j.second;
+              }
+            }
+            cc.id = sc.id;
           }
-          cc.id = sc.id;
           controlClient.send();
         }
       }
