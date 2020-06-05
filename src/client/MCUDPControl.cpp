@@ -39,7 +39,7 @@ void cli(mc_control::MCGlobalController & ctl)
     {
       ctl.GoToHalfSitPose_service();
     }
-    else
+    else if(token.size())
     {
       std::cerr << "Unkwown command " << token << std::endl;
     }
