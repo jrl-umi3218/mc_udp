@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-16.04, ubuntu-18.04]
-        compiler: [gcc]
+        compiler: [gcc,clang]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
