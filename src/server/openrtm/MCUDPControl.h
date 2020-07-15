@@ -6,15 +6,21 @@
 
 #include <mc_udp/server/Server.h>
 
-#include <chrono>
-#include <memory>
+// clang-format off
+// Clang-format was disabled on purpose here to prevent it from re-ordering the includes
+// These must come first
+#include <rtm/idl/BasicDataTypeSkel.h>
+#include <rtm/idl/ExtendedDataTypesSkel.h>
+
 #include <rtm/CorbaPort.h>
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
 #include <rtm/Manager.h>
-#include <rtm/idl/BasicDataTypeSkel.h>
-#include <rtm/idl/ExtendedDataTypesSkel.h>
+
+#include <chrono>
+#include <memory>
+// clang-format on
 
 class MCUDPControl : public RTC::DataFlowComponentBase
 {
