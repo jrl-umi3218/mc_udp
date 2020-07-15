@@ -31,7 +31,7 @@ void cli(mc_control::MCGlobalController & ctl)
     ss >> token;
     if(token == "stop")
     {
-      LOG_INFO("Stopping connection")
+      mc_rtc::log::info("Stopping connection");
       running = false;
     }
     else if(token == "hs" || token == "GoToHalfSitPose" || token == "half_sitting")
@@ -100,7 +100,7 @@ int main(int argc, char * argv[])
 
   if(vm.count("encoderVelocity"))
   {
-    LOG_INFO("[UDP] Sending/Receiving encoder velocities");
+    mc_rtc::log::info("[UDP] Sending/Receiving encoder velocities");
     withEncoderVelocity = true;
   }
 
@@ -111,9 +111,9 @@ int main(int argc, char * argv[])
 
   if(mc_rtc::MC_RTC_VERSION != mc_rtc::version())
   {
-    LOG_ERROR("mc_rtc_ticker was compiled with "
-              << mc_rtc::MC_RTC_VERSION << " but mc_rtc is at version " << mc_rtc::version()
-              << ", you might face subtle issues or unexpected crashes, please recompile mc_rtc_ticker")
+    mc_rtc::log::error("mc_udp was compiled with {} but mc_rtc is at version {}, you might face subtle issues or "
+                       "unexpected crashes, please recompile mc_udp",
+                       mc_rtc::MC_RTC_VERSION, mc_rtc::version());
   }
 
   mc_control::MCGlobalController::GlobalConfiguration gconfig(conf_file, nullptr);
@@ -128,17 +128,17 @@ int main(int argc, char * argv[])
   mc_control::MCGlobalController controller(gconfig);
   if(singleClient)
   {
-    LOG_INFO("Connect UDP client to " << host << ":" << port)
+    mc_rtc::log::info("Connect UDP client to {};{}", host, port);
   }
   else
   {
-    LOG_INFO("Connecting UDP sensors client to " << host << ":" << port)
+    mc_rtc::log::info("Connecting UDP sensors client to {}:{}", host, port);
   }
   mc_udp::Client sensorsClient(host, port);
   mc_udp::Client * controlClientPtr = &sensorsClient;
   if(!singleClient)
   {
-    LOG_INFO("Connecting UDP control client to " << host << ":" << port + 1)
+    mc_rtc::log::info("Connecting UDP control client to {}:{}", host, port + 1);
     controlClientPtr = new mc_udp::Client(host, port + 1);
   }
   mc_udp::Client & controlClient = *controlClientPtr;
@@ -196,11 +196,11 @@ int main(int argc, char * argv[])
           alphaInit = ignoredVelocityValues[jN];
         }
         ignoredVelocities[idx] = alphaInit;
-        LOG_WARNING("[UDP] Joint " << jN << " is ignored, value = " << qInit << ", velocity=" << alphaInit);
+        mc_rtc::log::warning("[UDP] Joint {} is ignored, value = {}, velocity= {}", jN, qInit, alphaInit);
       }
       else
       {
-        LOG_WARNING("[UDP] Ignored joint " << jN << " is not present in robot " << controller.robot().name());
+        mc_rtc::log::warning("[UDP] Ignored joint {} is not present in robot ", jN, controller.robot().name());
       }
     }
   }
@@ -304,7 +304,7 @@ int main(int argc, char * argv[])
         {
           alphaOut.resize(rjo.size());
         }
-        LOG_INFO("[MCUDPControl] Init duration " << init_dt.count())
+        mc_rtc::log::info("[MCUDPControl] Init duration {}", init_dt.count());
         sensorsClient.init();
         if(!singleClient)
         {
@@ -315,8 +315,8 @@ int main(int argc, char * argv[])
       {
         if(prev_id + 1 != sc.id)
         {
-          LOG_WARNING("[MCUDPControl] Missed one or more sensors reading (previous id: "
-                      << prev_id << ", current id: " << sensorsClient.sensors().id << ")")
+          mc_rtc::log::warning("[MCUDPControl] Missed one or more sensors reading (previous id: {}, current id: {})",
+                               prev_id, sensorsClient.sensors().id);
         }
         if(controller.run())
         {
