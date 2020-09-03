@@ -34,8 +34,8 @@ struct RobotSensors
   double orientation[3];
   /** Angular velocity sensor */
   double angularVelocity[3];
-  /** Angular acceleration */
-  double angularAcceleration[3];
+  /** Linear acceleration */
+  double linearAcceleration[3];
   /** Position of IMU (pIn) **/
   double position[3];
   /** Position of floating base **/
