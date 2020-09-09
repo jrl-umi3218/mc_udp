@@ -38,7 +38,7 @@ size_t RobotSensors::size() const
       sizeof(uint64_t) + torques.size() * sizeof(double) +
       // Size of fsensors
       fsensorsSize() +
-      // Size of orientation + angularVelocity + angularAcceleration
+      // Size of orientation + angularVelocity + linearAcceleration
       9 * sizeof(double) +
       // Size of position (pIn)
       3 * sizeof(double) +
@@ -105,7 +105,7 @@ void RobotSensors::toBuffer(uint8_t * buffer) const
   }
   memcpy_advance(buffer, orientation, 3 * sizeof(double), offset);
   memcpy_advance(buffer, angularVelocity, 3 * sizeof(double), offset);
-  memcpy_advance(buffer, angularAcceleration, 3 * sizeof(double), offset);
+  memcpy_advance(buffer, linearAcceleration, 3 * sizeof(double), offset);
   memcpy_advance(buffer, position, 3 * sizeof(double), offset);
   memcpy_advance(buffer, floatingBasePos, 3 * sizeof(double), offset);
   memcpy_advance(buffer, floatingBaseRPY, 3 * sizeof(double), offset);
@@ -156,7 +156,7 @@ void RobotSensors::fromBuffer(uint8_t * buffer)
   }
   memcpy_advance(orientation, buffer, 3 * sizeof(double), offset);
   memcpy_advance(angularVelocity, buffer, 3 * sizeof(double), offset);
-  memcpy_advance(angularAcceleration, buffer, 3 * sizeof(double), offset);
+  memcpy_advance(linearAcceleration, buffer, 3 * sizeof(double), offset);
   memcpy_advance(position, buffer, 3 * sizeof(double), offset);
   memcpy_advance(floatingBasePos, buffer, 3 * sizeof(double), offset);
   memcpy_advance(floatingBaseRPY, buffer, 3 * sizeof(double), offset);

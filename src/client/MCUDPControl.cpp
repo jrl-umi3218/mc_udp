@@ -252,30 +252,27 @@ int main(int argc, char * argv[])
           sensorsClient.sensors().angularVelocity[2];
       controller.setSensorAngularVelocity(vel);
       Eigen::Vector3d acc;
-      acc << sensorsClient.sensors().angularAcceleration[0], sensorsClient.sensors().angularAcceleration[1],
-          sensorsClient.sensors().angularAcceleration[2];
-      controller.setSensorAcceleration(acc);
+      acc << sensorsClient.sensors().linearAcceleration[0], sensorsClient.sensors().linearAcceleration[1],
+          sensorsClient.sensors().linearAcceleration[2];
+      controller.setSensorLinearAcceleration(acc);
 
       // Floating base sensor
       if(controller.robot().hasBodySensor("FloatingBase"))
       {
         controller.setSensorPositions(
-            controller.robot(),
             {{"FloatingBase", {sc.floatingBasePos[0], sc.floatingBasePos[1], sc.floatingBasePos[2]}}});
         Eigen::Vector3d fbRPY;
         controller.setSensorOrientations(
-            controller.robot(),
             {{"FloatingBase", Eigen::Quaterniond(mc_rbdyn::rpyToMat(
                                   {sc.floatingBaseRPY[0], sc.floatingBaseRPY[1], sc.floatingBaseRPY[2]}))}});
         controller.setSensorAngularVelocities(
-            controller.robot(),
             {{"FloatingBase", {sc.floatingBaseVel[0], sc.floatingBaseVel[1], sc.floatingBaseVel[2]}}});
         controller.setSensorLinearVelocities(
-            controller.robot(),
             {{"FloatingBase", {sc.floatingBaseVel[3], sc.floatingBaseVel[4], sc.floatingBaseVel[5]}}});
-        controller.setSensorAccelerations(
-            controller.robot(),
+        controller.setSensorAngularAccelerations(
             {{"FloatingBase", {sc.floatingBaseAcc[0], sc.floatingBaseAcc[1], sc.floatingBaseAcc[2]}}});
+        controller.setSensorLinearAccelerations(
+            {{"FloatingBase", {sc.floatingBaseAcc[3], sc.floatingBaseAcc[4], sc.floatingBaseAcc[5]}}});
       }
 
       for(const auto & fs : sc.fsensors)

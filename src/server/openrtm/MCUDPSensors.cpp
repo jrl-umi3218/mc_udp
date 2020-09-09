@@ -170,13 +170,13 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
   {
     m_accInIn.read();
 #ifdef MC_UDP_OPENRTM_LEGACY
-    server_.sensors().angularAcceleration[0] = m_accIn.data[0];
-    server_.sensors().angularAcceleration[1] = m_accIn.data[1];
-    server_.sensors().angularAcceleration[2] = m_accIn.data[2];
+    server_.sensors().linearAcceleration[0] = m_accIn.data[0];
+    server_.sensors().linearAcceleration[1] = m_accIn.data[1];
+    server_.sensors().linearAcceleration[2] = m_accIn.data[2];
 #else
-    server_.sensors().angularAcceleration[0] = m_accIn.data.ax;
-    server_.sensors().angularAcceleration[1] = m_accIn.data.ay;
-    server_.sensors().angularAcceleration[2] = m_accIn.data.az;
+    server_.sensors().linearAcceleration[0] = m_accIn.data.ax;
+    server_.sensors().linearAcceleration[1] = m_accIn.data.ay;
+    server_.sensors().linearAcceleration[2] = m_accIn.data.az;
 #endif
   }
   if(m_taucInIn.isNew())
