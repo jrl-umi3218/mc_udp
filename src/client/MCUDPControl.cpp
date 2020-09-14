@@ -223,20 +223,19 @@ int main(int argc, char * argv[])
       const std::string & mainRobotName = controller.robot().name();
       if(!sensorsClient.sensors().messages.count(mainRobotName))
       {
-        LOG_ERROR("Server is providing sensors message for:");
+        mc_rtc::log::error("Server is providing sensors message for:");
         for(const auto & m : sensorsClient.sensors().messages)
         {
-          LOG_ERROR("- " << m.first);
+          mc_rtc::log::error("- {}", m.first);
         }
-        LOG_ERROR_AND_THROW(std::runtime_error, "Server is not providing sensors message for main robot");
+        mc_rtc::log::error_and_throw<std::runtime_error>("Server is not providing sensors message for main robot");
       }
       for(const auto & msg : sensorsClient.sensors().messages)
       {
         bool isMain = mainRobotName == msg.first;
         if(!controller.controller().robots().hasRobot(msg.first))
         {
-          LOG_ERROR("Server is providing data for a robot that is not controlled by this controller: \"" << msg.first
-                                                                                                         << "\"");
+          mc_rtc::log::error("Server is providing data for a robot that is not controlled by this controller: {}", msg.first);
           continue;
         }
         const auto & sensors = msg.second;
