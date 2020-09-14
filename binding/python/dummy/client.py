@@ -40,7 +40,7 @@ if __name__ == "__main__":
                 print("sensors.fsensors: {}".format({fs.name: fs.reading for fs in sensors.fsensors}))
                 print("sensors.orientation: {}".format(sensors.orientation))
                 print("sensors.angularVelocity: {}".format(sensors.angularVelocity))
-                print("sensors.angularAcceleration: {}".format(sensors.angularAcceleration))
+                print("sensors.linearAcceleration: {}".format(sensors.linearAcceleration))
             iter_ += 1
             client.send()
             time.sleep(0.001)

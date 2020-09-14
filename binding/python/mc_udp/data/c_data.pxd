@@ -21,7 +21,7 @@ cdef extern from "<mc_udp/data/RobotSensors.h>" namespace "mc_udp":
         vector[ForceSensor] fsensors
         double orientation[3]
         double angularVelocity[3]
-        double angularAcceleration[3]
+        double linearAcceleration[3]
         double position[3]
         double floatingBasePos[3]
         double floatingBaseRPY[3]

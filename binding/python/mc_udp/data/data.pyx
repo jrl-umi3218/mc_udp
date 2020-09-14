@@ -103,13 +103,13 @@ cdef class RobotSensors(object):
         def __set__(self, value):
             self.__writable()
             self.impl.angularVelocity = value
-    property angularAcceleration:
+    property linearAcceleration:
         def __get__(self):
             self.__valid()
-            return self.impl.angularAcceleration
+            return self.impl.linearAcceleration
         def __set__(self, value):
             self.__writable()
-            self.impl.angularAcceleration = value
+            self.impl.linearAcceleration = value
     property position:
         def __get__(self):
             self.__valid()

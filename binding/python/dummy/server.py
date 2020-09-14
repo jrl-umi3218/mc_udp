@@ -22,7 +22,7 @@ if __name__ == "__main__":
     [ sensors.fsensor(sensor, reading) for sensor in ["rfsensor", "lfsensor", "rhsensor", "lhsensor"] ]
     sensors.orientation = [1, 2, 3]
     sensors.angularVelocity = [4, 5, 6]
-    sensors.angularAcceleration = [7, 8, 9]
+    sensors.linearAcceleration = [7, 8, 9]
     sensors.id = 0
     control_id = 0
     iter_ = 0

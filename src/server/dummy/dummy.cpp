@@ -37,9 +37,9 @@ int main(int argc, char * argv[])
   sensors.angularVelocity[0] = 4;
   sensors.angularVelocity[1] = 5;
   sensors.angularVelocity[2] = 6;
-  sensors.angularAcceleration[0] = 7;
-  sensors.angularAcceleration[1] = 8;
-  sensors.angularAcceleration[2] = 9;
+  sensors.linearAcceleration[0] = 7;
+  sensors.linearAcceleration[1] = 8;
+  sensors.linearAcceleration[2] = 9;
   sensors.id = 0;
   size_t control_id = 0;
   while(1)
