@@ -89,6 +89,9 @@ int main(int argc, char * argv[])
     ("single,s", "Use a single client");
   // clang-format on
 
+  /** If the robot name is NOT_SET then warn once */
+  bool warnedNOT_SET = false;
+
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
   po::notify(vm);
@@ -235,11 +238,24 @@ int main(int argc, char * argv[])
         bool isMain = mainRobotName == msg.first;
         if(!controller.controller().robots().hasRobot(msg.first))
         {
-          mc_rtc::log::error("Server is providing data for a robot that is not controlled by this controller: {}", msg.first);
-          continue;
+          if(msg.first == "NOT_SET")
+          {
+            if(!warnedNOT_SET)
+            {
+              mc_rtc::log::warning("Server is providing data for the NOT_SET robot, the server configuration should be "
+                                   "updated, assuming this is the main robot");
+              warnedNOT_SET = true;
+            }
+          }
+          else
+          {
+            mc_rtc::log::error("Server is providing data for a robot that is not controlled by this controller: {}",
+                               msg.first);
+            continue;
+          }
         }
         const auto & sensors = msg.second;
-        auto & robot = controller.controller().robots().robot(msg.first);
+        auto & robot = msg.first != "NOT_SET" ? controller.robot(msg.first) : controller.robot();
         Eigen::Vector3d rpy;
         rpy << sensors.orientation[0], sensors.orientation[1], sensors.orientation[2];
         Eigen::Vector3d pos;
@@ -290,10 +306,9 @@ int main(int argc, char * argv[])
               {{"FloatingBase", {sensors.floatingBasePos[0], sensors.floatingBasePos[1], sensors.floatingBasePos[2]}}});
           Eigen::Vector3d fbRPY;
           controller.setSensorOrientations(
-              robot.name(),
-              {{"FloatingBase",
-                Eigen::Quaterniond(mc_rbdyn::rpyToMat(
-                    {sensors.floatingBaseRPY[0], sensors.floatingBaseRPY[1], sensors.floatingBaseRPY[2]}))}});
+              robot.name(), {{"FloatingBase", Eigen::Quaterniond(mc_rbdyn::rpyToMat({sensors.floatingBaseRPY[0],
+                                                                                     sensors.floatingBaseRPY[1],
+                                                                                     sensors.floatingBaseRPY[2]}))}});
           controller.setSensorAngularVelocities(
               robot.name(),
               {{"FloatingBase", {sensors.floatingBaseVel[0], sensors.floatingBaseVel[1], sensors.floatingBaseVel[2]}}});
