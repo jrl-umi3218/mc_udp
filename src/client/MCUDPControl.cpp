@@ -231,7 +231,8 @@ int main(int argc, char * argv[])
         {
           mc_rtc::log::error("- {}", m.first);
         }
-        mc_rtc::log::error_and_throw<std::runtime_error>("Server is not providing sensors message for main robot");
+        mc_rtc::log::error_and_throw<std::runtime_error>("Server is not providing sensors message for main robot ({})",
+                                                         mainRobotName);
       }
       for(const auto & msg : sensorsClient.sensors().messages)
       {
