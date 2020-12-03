@@ -32,7 +32,7 @@ Client::Client(const std::string & host, int port) : recvData_(2048, 0), sendDat
   auto hp = gethostbyname(host.c_str());
   if(!hp)
   {
-    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Faile to resolve host (" << host << "): " << strerror(h_errno));
+    MC_UDP_ERROR_AND_THROW(std::runtime_error, "Failed to resolve host (" << host << "): " << strerror(h_errno));
   }
   memset(&server_, 0, sizeof(server_));
   server_.sin_family = AF_INET;
