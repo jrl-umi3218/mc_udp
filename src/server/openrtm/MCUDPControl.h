@@ -40,6 +40,7 @@ protected:
   // Configuration/Run
   bool m_enabled;
   int port;
+  std::string robot_;
 
   // Outputs
   RTC::TimedDoubleSeq m_qOut;

@@ -10,14 +10,19 @@ set(data_SRC
 )
 
 set(data_HDR
+  "${include_DIR}/data/api.h"
+  "${include_DIR}/data/MultiRobotMessage.h"
+  "${include_DIR}/data/MultiRobotMessage.hpp"
   "${include_DIR}/data/RobotSensors.h"
   "${include_DIR}/data/RobotControl.h"
+  "${include_DIR}/data/utils.h"
   "${include_DIR}/logging.h"
 )
 
 add_library(mc_udp_data SHARED ${data_SRC} ${data_HDR})
 add_library(mc_udp::data ALIAS mc_udp_data)
 set_target_properties(mc_udp_data PROPERTIES EXPORT_NAME data)
+set_target_properties(mc_udp_data PROPERTIES COMPILE_FLAGS "-DMC_UDP_DATA_EXPORTS")
 target_include_directories(mc_udp_data PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -34,6 +39,7 @@ install(
   EXPORT mc_udpTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
   PUBLIC_HEADER DESTINATION include/mc_udp
 )
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <mc_udp/data/api.h>
+
 #include <string>
 #include <vector>
 
@@ -11,14 +13,14 @@ namespace mc_udp
 {
 
 /** Represent a force sensor reading */
-struct ForceSensor
+struct MC_UDP_DATA_DLLAPI ForceSensor
 {
   std::string name;
   double reading[6];
 };
 
 /** Robot sensors' data provided by the server */
-struct RobotSensors
+struct MC_UDP_DATA_DLLAPI RobotSensors
 {
   /** Unique identifier for the reading */
   uint64_t id;
@@ -52,10 +54,14 @@ struct RobotSensors
 
   /** Compute required buffer size */
   size_t size() const;
-  /** Fill pre-allocated buffer, must be of (at-least) size() */
-  void toBuffer(uint8_t * buffer) const;
-  /** Fill from a provided buffer */
-  void fromBuffer(uint8_t * buffer);
+  /** Fill pre-allocated buffer, must be of (at-least) size()
+   *
+   * Returns the number of bytes written */
+  size_t toBuffer(uint8_t * buffer) const;
+  /** Fill from a provided buffer
+   *
+   * Returns the number of bytes consumed */
+  size_t fromBuffer(uint8_t * buffer);
 
 private:
   /** Size of required buffer size for force sensors */

@@ -4,11 +4,17 @@
 
 #pragma once
 
-#include <mc_udp/data/RobotControl.h>
-#include <mc_udp/data/RobotSensors.h>
+#ifndef WIN32
+#  include <netinet/in.h>
+#  include <sys/socket.h>
+#else
+#  include <WS2tcpip.h>
+#  include <WinSock2.h>
+#  pragma comment(lib, "ws2_32.lib")
+#endif
 
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <mc_udp/data/MultiRobotMessage.h>
+#include <mc_udp/server/api.h>
 
 namespace mc_udp
 {
@@ -20,7 +26,7 @@ namespace mc_udp
  *  sensors' and control data is left to clients of this class
  *
  */
-struct Server
+struct MC_UDP_SERVER_DLLAPI Server
 {
   /** Create a non-working server
    *
@@ -51,12 +57,12 @@ struct Server
    */
   void send();
 
-  inline const RobotControl & control() const
+  inline const MultiRobotControl & control() const
   {
     return control_;
   }
 
-  inline RobotSensors & sensors()
+  inline MultiRobotSensors & sensors()
   {
     return sensors_;
   }
@@ -68,8 +74,8 @@ struct Server
   void restart(int port);
 
 private:
-  RobotControl control_;
-  RobotSensors sensors_;
+  MultiRobotControl control_;
+  MultiRobotSensors sensors_;
   int socket_;
   sockaddr_in client_;
   socklen_t clientAddrLen_;
@@ -79,6 +85,9 @@ private:
   bool initClient_;
   bool waitInit_;
   std::string id_;
+#ifdef WIN32
+  WSAData wsaData_;
+#endif
 };
 
 } // namespace mc_udp

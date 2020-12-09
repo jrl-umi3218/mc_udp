@@ -3,6 +3,7 @@
 #
 
 set(server_HDR
+  "${include_DIR}/server/api.h"
   "${include_DIR}/server/Server.h"
 )
 
@@ -13,6 +14,7 @@ set(server_SRC
 add_library(mc_udp_server SHARED ${server_SRC} ${server_HDR})
 add_library(mc_udp::server ALIAS mc_udp_server)
 set_target_properties(mc_udp_server PROPERTIES EXPORT_NAME server)
+set_target_properties(mc_udp_server PROPERTIES COMPILE_FLAGS "-DMC_UDP_SERVER_EXPORTS")
 target_link_libraries(mc_udp_server PUBLIC mc_udp_data)
 target_include_directories(mc_udp_server PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -24,6 +26,7 @@ install(
   EXPORT mc_udp_serverTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
   PUBLIC_HEADER DESTINATION include/mc_udp/server
 )
 
