@@ -79,14 +79,14 @@ private:
 private:
   MultiRobotControl control_;
   MultiRobotSensors sensors_;
-  int socket_;
+  int socket_ = 0;
+  bool initClient_ = false;
+  bool waitInit_ = false;
   sockaddr_in client_;
   socklen_t clientAddrLen_;
   std::vector<uint8_t> recvData_;
   std::vector<uint8_t> sendData_;
   void start(int port);
-  bool initClient_;
-  bool waitInit_;
   std::string id_;
 #ifdef WIN32
   WSAData wsaData_;

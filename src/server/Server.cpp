@@ -19,12 +19,12 @@
 namespace mc_udp
 {
 
-Server::Server() : socket_(0), recvData_(1024, 0), sendData_(1024, 0), initClient_(false), waitInit_(false)
+Server::Server() : recvData_(1024, 0), sendData_(1024, 0)
 {
   init();
 }
 
-Server::Server(int port)
+Server::Server(int port) : recvData_(1024, 0), sendData_(1024, 0)
 {
   init();
   start(port);

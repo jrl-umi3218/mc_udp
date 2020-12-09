@@ -23,8 +23,8 @@ void RobotSensors::fsensor(const std::string & name, double data[6])
   }
   ForceSensor fs;
   fs.name = name;
-  fsensors.push_back(fs);
   std::memcpy(fs.reading, data, 6 * sizeof(double));
+  fsensors.push_back(fs);
 }
 
 size_t RobotSensors::size() const
