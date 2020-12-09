@@ -21,9 +21,10 @@ void RobotSensors::fsensor(const std::string & name, double data[6])
       return;
     }
   }
-  fsensors.emplace_back();
-  fsensors.back().name = name;
-  std::memcpy(fsensors.back().reading, data, 6 * sizeof(double));
+  ForceSensor fs;
+  fs.name = name;
+  fsensors.push_back(fs);
+  std::memcpy(fs.reading, data, 6 * sizeof(double));
 }
 
 size_t RobotSensors::size() const
@@ -58,7 +59,7 @@ size_t RobotSensors::fsensorsSize() const
   size_t ret = sizeof(uint64_t); // Lenght of fSensors
   for(size_t i = 0; i < fsensors.size(); ++i)
   {
-    const auto & fsensor = fsensors[i];
+    const ForceSensor & fsensor = fsensors[i];
     ret += sizeof(uint64_t) + fsensor.name.size() * sizeof(char) + 6 * sizeof(double);
   }
   return ret;
@@ -77,9 +78,9 @@ static void toBuffer(uint8_t * dest, const std::vector<ForceSensor> & src, size_
 {
   uint64_t size = src.size();
   memcpy_advance(dest, &size, sizeof(uint64_t), offset);
-  for(const auto & fs : src)
+  for(size_t i = 0; i < src.size(); i++)
   {
-    toBuffer(dest, fs, offset);
+    toBuffer(dest, src[i], offset);
   }
 }
 
@@ -118,9 +119,9 @@ static void fromBuffer(std::vector<ForceSensor> & dest, const uint8_t * src, siz
   uint64_t size = 0;
   memcpy_advance(&size, src, sizeof(uint64_t), offset);
   dest.resize(size);
-  for(auto & fs : dest)
+  for(size_t i = 0; i < dest.size(); i++)
   {
-    fromBuffer(fs, src, offset);
+    fromBuffer(dest[i], src, offset);
   }
 }
 

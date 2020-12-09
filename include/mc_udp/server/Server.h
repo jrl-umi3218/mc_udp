@@ -74,6 +74,9 @@ struct MC_UDP_SERVER_DLLAPI Server
   void restart(int port);
 
 private:
+  void init(); /** delegating constructor */
+
+private:
   MultiRobotControl control_;
   MultiRobotSensors sensors_;
   int socket_;

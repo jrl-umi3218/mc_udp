@@ -9,15 +9,15 @@ template<typename MsgT>
 size_t MultiRobotMessage<MsgT>::size() const
 {
   size_t ret = sizeof(uint64_t); // Number of robots in the message
-  for(const auto & m : messages)
+  for(auto it = messages.cbegin(); it != messages.cend(); it++)
   {
     ret +=
         // Length of robot name
         sizeof(uint64_t) +
         // Name data
-        m.first.size() * sizeof(char) +
+        it->first.size() * sizeof(char) +
         // Length of message for that robot
-        m.second.size();
+        it->second.size();
   }
   return ret;
 }
@@ -28,10 +28,10 @@ size_t MultiRobotMessage<MsgT>::toBuffer(uint8_t * buffer) const
   size_t offset = 0;
   uint64_t tmp = messages.size();
   utils::memcpy_advance(buffer, &tmp, sizeof(uint64_t), offset);
-  for(const auto & m : messages)
+  for(auto it = messages.cbegin(); it != messages.cend(); it++)
   {
-    utils::toBuffer(buffer, m.first, offset);
-    offset += m.second.toBuffer(buffer + offset);
+    utils::toBuffer(buffer, it->first, offset);
+    offset += it->second.toBuffer(buffer + offset);
   }
   return offset;
 }

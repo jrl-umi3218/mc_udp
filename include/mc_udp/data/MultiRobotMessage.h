@@ -32,8 +32,8 @@ struct MultiRobotMessage
   size_t fromBuffer(uint8_t * buffer);
 };
 
-using MultiRobotControl = MultiRobotMessage<RobotControl>;
-using MultiRobotSensors = MultiRobotMessage<RobotSensors>;
+typedef MultiRobotMessage<RobotControl> MultiRobotControl;
+typedef MultiRobotMessage<RobotSensors> MultiRobotSensors;
 
 } // namespace mc_udp
 

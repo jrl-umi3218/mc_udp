@@ -8,6 +8,7 @@
 #include <mc_udp/data/Init.h>
 #include <mc_udp/logging.h>
 
+#include <errno.h>
 #include <stdexcept>
 #include <string.h>
 
@@ -20,14 +21,20 @@ namespace mc_udp
 
 Server::Server() : socket_(0), recvData_(1024, 0), sendData_(1024, 0), initClient_(false), waitInit_(false)
 {
+  init();
+}
+
+Server::Server(int port)
+{
+  init();
+  start(port);
+}
+
+void Server::init()
+{
 #ifdef WIN32
   WSAStartup(MAKEWORD(2, 2), &wsaData_);
 #endif
-}
-
-Server::Server(int port) : Server()
-{
-  start(port);
 }
 
 Server::~Server()
@@ -57,9 +64,9 @@ bool Server::recv()
     else if(length == sizeof(Init) * sizeof(uint8_t))
     {
       MC_UDP_INFO(id_ << " Start streaming data to client")
-      for(auto & m : sensors().messages)
+      for(auto it = sensors().messages.begin(); it != sensors().messages.end(); it++)
       {
-        m.second.id = 0;
+        it->second.id = 0;
       }
       initClient_ = false;
     }

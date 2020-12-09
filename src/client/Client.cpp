@@ -8,6 +8,7 @@
 #include <mc_udp/data/Init.h>
 #include <mc_udp/logging.h>
 
+#include <errno.h>
 #include <stdexcept>
 #include <string.h>
 

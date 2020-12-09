@@ -26,6 +26,9 @@ set_target_properties(mc_udp_data PROPERTIES COMPILE_FLAGS "-DMC_UDP_DATA_EXPORT
 target_include_directories(mc_udp_data PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
+if(BUILD_LEGACY_OPENRTM_SERVER)
+  target_compile_options(mc_udp_data PUBLIC -std=c++0x)
+endif()
 
 add_subdirectory(client)
 add_subdirectory(server)

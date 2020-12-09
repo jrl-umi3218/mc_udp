@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstring>
+#include <stdint.h>
 #include <string>
 #include <vector>
 
