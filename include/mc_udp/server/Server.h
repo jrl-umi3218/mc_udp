@@ -79,9 +79,9 @@ private:
 private:
   MultiRobotControl control_;
   MultiRobotSensors sensors_;
-  int socket_ = 0;
-  bool initClient_ = false;
-  bool waitInit_ = false;
+  int socket_;
+  bool initClient_;
+  bool waitInit_;
   sockaddr_in client_;
   socklen_t clientAddrLen_;
   std::vector<uint8_t> recvData_;
