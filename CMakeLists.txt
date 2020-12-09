@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.1) # Minimum required by recent mc_rtc
 
-project(mc_udp CXX)
+project(mc_udp LANGUAGES CXX VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 11)
 
 enable_testing()

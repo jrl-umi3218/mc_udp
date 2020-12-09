@@ -14,6 +14,7 @@ add_library(mc_udp_client SHARED ${client_SRC} ${client_HDR})
 add_library(mc_udp::client ALIAS mc_udp_client)
 set_target_properties(mc_udp_client PROPERTIES EXPORT_NAME client)
 set_target_properties(mc_udp_client PROPERTIES COMPILE_FLAGS "-DMC_UDP_CLIENT_EXPORTS")
+set_target_properties(mc_udp_client PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR} VERSION ${PROJECT_VERSION})
 target_link_libraries(mc_udp_client PUBLIC mc_udp_data)
 
 install(
