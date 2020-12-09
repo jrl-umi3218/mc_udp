@@ -1,0 +1,4 @@
+usr/bin/MCUDPSensorsComp
+usr/lib/MCUDPSensors.so
+usr/bin/MCUDPControlComp
+usr/lib/MCUDPControl.so

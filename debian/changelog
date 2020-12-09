@@ -1,0 +1,5 @@
+mc-udp (1.0.0-1ubuntu1) unstable; urgency=medium
+
+  * Initial release
+
+ -- Pierre Gergondet <pierre.gergondet+ppa@gmail.com>  Wed, 09 Dec 2020 10:07:37 +0800
