@@ -6,6 +6,7 @@
 
 #include <mc_udp/data/api.h>
 
+#include <stdint.h>
 #include <string>
 #include <vector>
 

@@ -375,7 +375,7 @@ int main(int argc, char * argv[])
         {
           for(const auto & robot : controller.controller().robots())
           {
-            const auto & rjo = controller.ref_joint_order();
+            const auto & rjo = robot.refJointOrder();
             if(rjo.size() == 0)
             {
               continue;

@@ -16,6 +16,7 @@ _SETUP_PROJECT_UNINSTALL()
 option(BUILD_TESTING "Build unit tests" ON)
 option(BUILD_MC_RTC_CLIENT "Build mc_rtc client" ON)
 option(BUILD_OPENRTM_SERVER "Build OpenRTM server component" ON)
+option(BUILD_LEGACY_OPENRTM_SERVER "Build OpenRTM server with c++0x" OFF)
 option(BUILD_DUMMY_CLIENT "Build dummy client" OFF)
 option(BUILD_DUMMY_SERVER "Build dummy server" OFF)
 

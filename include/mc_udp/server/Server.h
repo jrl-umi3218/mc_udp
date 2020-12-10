@@ -74,16 +74,19 @@ struct MC_UDP_SERVER_DLLAPI Server
   void restart(int port);
 
 private:
+  void init(); /** delegating constructor */
+
+private:
   MultiRobotControl control_;
   MultiRobotSensors sensors_;
   int socket_;
+  bool initClient_;
+  bool waitInit_;
   sockaddr_in client_;
   socklen_t clientAddrLen_;
   std::vector<uint8_t> recvData_;
   std::vector<uint8_t> sendData_;
   void start(int port);
-  bool initClient_;
-  bool waitInit_;
   std::string id_;
 #ifdef WIN32
   WSAData wsaData_;
