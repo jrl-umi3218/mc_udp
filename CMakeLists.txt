@@ -22,7 +22,7 @@ option(BUILD_DUMMY_SERVER "Build dummy server" OFF)
 
 add_subdirectory(src)
 
-if(PYTHON_BINDING AND NOT BUILD_LEGACY_OPENRTM_SERVER)
+if(PYTHON_BINDING)
   add_subdirectory(binding/python)
 endif()
 
