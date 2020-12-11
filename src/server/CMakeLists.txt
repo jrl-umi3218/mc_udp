@@ -15,6 +15,7 @@ add_library(mc_udp_server SHARED ${server_SRC} ${server_HDR})
 add_library(mc_udp::server ALIAS mc_udp_server)
 set_target_properties(mc_udp_server PROPERTIES EXPORT_NAME server)
 set_target_properties(mc_udp_server PROPERTIES COMPILE_FLAGS "-DMC_UDP_SERVER_EXPORTS")
+set_target_properties(mc_udp_server PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR} VERSION ${PROJECT_VERSION})
 target_link_libraries(mc_udp_server PUBLIC mc_udp_data)
 target_include_directories(mc_udp_server PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

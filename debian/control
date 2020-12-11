@@ -1,0 +1,90 @@
+Source: mc-udp
+Priority: optional
+Maintainer: Pierre Gergondet <pierre.gergondet+ppa@gmail.com>
+Standards-Version: 4.1.2
+Section: libs
+Homepage: https://github.com/jrl-umi3218/mc_udp
+Vcs-Git: https://github.com/jrl-umi3218/mc_udp
+Vcs-Browser: https://github.com/jrl-umi3218/mc_udp
+Build-Depends: debhelper (>= 9),
+               cmake,
+               python-is-python3|python,
+               python-all,
+               python-dev,
+               python-enum34,
+               python-nose,
+               python-setuptools,
+               cython,
+               python3-all,
+               python3-dev,
+               python3-nose,
+               python3-setuptools,
+               cython3,
+               hrpsys-base,
+               libboost-program-options-dev,
+               libboost-thread-dev,
+               libmc-rtc-dev
+
+Package: libmc-udp-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libmc-rtc-dev,
+         libmc-udp (= ${binary:Version}),
+         ${misc:Depends}
+Description: mc-udp - Development files
+ mc_udp is a generic UDP interface to connect mc_rtc to a robot or simulator.
+ .
+ This package contains development files (headers and shared library
+ symbolic link)
+
+Package: libmc-udp
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: mc-udp - Development files
+ mc_udp is a generic UDP interface to connect mc_rtc to a robot or simulator.
+ .
+ This package contains the essential files for a working system (shared
+ libraries)
+
+Package: mc-udp-control
+Architecture: any
+Multi-Arch: same
+Depends: libmc-udp,
+         ${misc:Depends}
+Description: mc-udp - Client
+ mc_udp is a generic UDP interface to connect mc_rtc to a robot or simulator.
+ .
+ This package contains the MCUDPControl client
+
+Package: mc-udp-openrtm
+Architecture: any
+Multi-Arch: same
+Depends: libmc-udp,
+         hrpsys-base,
+         ${shlibs:Depends},
+         ${misc:Depends}
+Description: mc-udp - OpenRTM servers
+ mc_udp is a generic UDP interface to connect mc_rtc to a robot or simulator.
+ .
+ This package contains the OpenRTM server components
+
+Package: python-mc-udp
+Section: python
+Architecture: any
+Depends: libmc-udp, ${python:Depends}, ${misc:Depends}, ${shlibs:Depends}
+Description: mc-udp - Python bindings
+ mc_udp is a generic UDP interface to connect mc_rtc to a robot or simulator.
+ .
+ Python bindings for the mc_udp libraries. Compatible with Python 2.
+
+Package: python3-mc-udp
+Section: python
+Architecture: any
+Depends: libmc-udp, ${python3:Depends}, ${misc:Depends}, ${shlibs:Depends}
+Description: mc_udp - Python bindings
+ mc_udp is a generic UDP interface to connect mc_rtc to a robot or simulator.
+ .
+ Python bindings for the mc_udp libraries. Compatible with Python 3.
