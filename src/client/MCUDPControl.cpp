@@ -216,10 +216,11 @@ int main(int argc, char * argv[])
   std::thread cli_thread([&controller]() { cli(controller); });
   std::vector<double> qIn;
   std::vector<double> alphaIn;
+  using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
+                                          std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
+  auto mc_udp_start = clock::now();
   while(running)
   {
-    using clock = typename std::conditional<std::chrono::high_resolution_clock::is_steady,
-                                            std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
     if(sensorsClient.recv())
     {
       auto start = clock::now();
@@ -421,6 +422,20 @@ int main(int argc, char * argv[])
       }
       prev_id = sc.id;
       udp_run_dt = clock::now() - start;
+    }
+    else if(!init)
+    {
+      duration_ms elapsed = clock::now() - mc_udp_start;
+      if(elapsed.count() > 5000)
+      {
+        mc_rtc::log::warning("No messages received yet, requesting stream again");
+        mc_udp_start = clock::now();
+        sensorsClient.sendHello();
+        if(controlClientPtr)
+        {
+          controlClient.sendHello();
+        }
+      }
     }
   }
   return 0;

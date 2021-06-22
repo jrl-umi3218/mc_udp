@@ -39,6 +39,9 @@ struct MC_UDP_CLIENT_DLLAPI Client
   /** Destructor */
   ~Client();
 
+  /** Can be send to retry the connection */
+  void sendHello();
+
   /** Should be send when we are ready to receive more data after the first sensors */
   void init();
 
@@ -78,8 +81,6 @@ private:
 #ifdef WIN32
   WSAData wsaData_;
 #endif
-
-  void sendHello();
 };
 
 } // namespace mc_udp
