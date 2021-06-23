@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-16.04, ubuntu-18.04, macos-latest, windows-latest]
+        os: [ubuntu-18.04, ubuntu-20.04, macos-latest, windows-latest]
         compiler: [gcc,clang]
         build-type: [Release, RelWithDebInfo]
         exclude:
@@ -65,27 +65,9 @@ jobs:
         ubuntu: |
           apt: cython python-setuptools cython3 python3-setuptools python-dev python3-dev libpython2.7-dev libpython3-dev hrpsys-base libmc-rtc-dev
         macos: |
-          cask: gfortran
-          brew: eigen boost tinyxml2 geos nanomsg yaml-cpp pkg-config libtool
+          brew-taps: mc-rtc/mc-rtc
+          brew: mc_rtc
           pip: Cython
-          options: -DPYTHON_BINDING:BOOL=OFF
-          github:
-            - path: gabime/spdlog
-              ref: v1.6.1
-              options: -DSPDLOG_BUILD_EXAMPLE:BOOL=OFF -DSPDLOG_BUILD_SHARED:BOOL=ON
-            - path: humanoid-path-planner/hpp-spline
-              ref: v4.7.0
-              options: -DBUILD_PYTHON_INTERFACE:BOOL=OFF
-            - path: jrl-umi3218/SpaceVecAlg
-            - path: jrl-umi3218/sch-core
-            - path: jrl-umi3218/eigen-qld
-            - path: jrl-umi3218/eigen-quadprog
-            - path: jrl-umi3218/RBDyn
-            - path: jrl-umi3218/Tasks
-            - path: jrl-umi3218/state-observation
-            - path: jrl-umi3218/mc_rbdyn_urdf
-            - path: jrl-umi3218/mc_rtc_data
-            - path: jrl-umi3218/mc_rtc
         windows: |
           pip: Cython
           options: -DPYTHON_BINDING:BOOL=OFF
