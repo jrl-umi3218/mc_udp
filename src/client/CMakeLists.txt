@@ -38,7 +38,7 @@ if(${BUILD_DUMMY_CLIENT})
 endif()
 
 if(${BUILD_MC_RTC_CLIENT})
-  find_package(mc_rtc 1.3.0 REQUIRED)
+  find_package(mc_rtc REQUIRED)
   find_package(Boost REQUIRED COMPONENTS program_options thread)
 
   set(MCUDPControl_SRC
