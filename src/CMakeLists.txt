@@ -35,7 +35,9 @@ add_subdirectory(client)
 add_subdirectory(server)
 
 install(DIRECTORY "${include_DIR}/data" DESTINATION include/mc_udp
-        FILES_MATCHING PATTERN "*.h")
+        FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN "*.hpp")
 install(FILES "${include_DIR}/logging.h" DESTINATION include/mc_udp)
 
 install(

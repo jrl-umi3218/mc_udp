@@ -37,4 +37,4 @@ typedef MultiRobotMessage<RobotSensors> MultiRobotSensors;
 
 } // namespace mc_udp
 
-#include "MultiRobotMessage.hpp"
+#include <mc_udp/data/MultiRobotMessage.hpp>
