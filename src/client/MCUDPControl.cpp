@@ -339,15 +339,8 @@ int main(int argc, char * argv[])
         init = true;
         auto init_end = clock::now();
         duration_ms init_dt = init_end - init_start;
-#if MC_RTC_VERSION_MAJOR < 2
         for(const auto & robot : controller.controller().robots())
-#else
-        for(const auto & robot_ptr : controller.controller().robots())
-#endif
         {
-#if MC_RTC_VERSION_MAJOR >= 2
-          const auto & robot = *robot_ptr;
-#endif
           const auto & rjo = robot.module().ref_joint_order();
           if(rjo.size() == 0)
           {
@@ -381,15 +374,8 @@ int main(int argc, char * argv[])
         }
         if(controller.run())
         {
-#if MC_RTC_VERSION_MAJOR < 2
           for(const auto & robot : controller.controller().robots())
-#else
-          for(const auto & robot_ptr : controller.controller().robots())
-#endif
           {
-#if MC_RTC_VERSION_MAJOR >= 2
-            const auto & robot = *robot_ptr;
-#endif
             const auto & rjo = robot.module().ref_joint_order();
             if(rjo.size() == 0)
             {
