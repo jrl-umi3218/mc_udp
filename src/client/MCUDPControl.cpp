@@ -374,7 +374,7 @@ int main(int argc, char * argv[])
         }
         if(controller.run())
         {
-          for(const auto & robot : controller.controller().robots())
+          for(const auto & robot : controller.controller().outputRobots())
           {
             const auto & rjo = robot.module().ref_joint_order();
             if(rjo.size() == 0)
