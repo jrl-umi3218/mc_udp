@@ -12,6 +12,7 @@
 namespace po = boost::program_options;
 
 #include <signal.h>
+#include <thread>
 
 static bool running = true;
 
