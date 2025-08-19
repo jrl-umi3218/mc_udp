@@ -155,7 +155,8 @@ int main(int argc, char * argv[])
   fsensors["rhsensor"] = "RightHandForceSensor";
   fsensors["lhsensor"] = "LeftHandForceSensor";
   std::map<std::string, std::map<std::string, sva::ForceVecd>> robot_wrenches;
-  auto refIndex = [&controller](const std::string & jName) {
+  auto refIndex = [&controller](const std::string & jName)
+  {
     const auto & rjo = controller.robot().refJointOrder();
     for(size_t i = 0; i < rjo.size(); ++i)
     {

@@ -248,10 +248,12 @@ RTC::ReturnCode_t MCUDPSensors::onExecute(RTC::UniqueId ec_id)
     {
       sensors.encoders[i] = m_qIn.data[i];
     }
-    coil::TimeValue coiltm(coil::gettimeofday());
+    auto chrono_tm = std::chrono::steady_clock::now();
     RTC::Time tm;
-    tm.sec = static_cast<CORBA::ULong>(coiltm.sec());
-    tm.nsec = static_cast<CORBA::ULong>(coiltm.usec()) * 1000;
+    tm.sec = static_cast<CORBA::ULong>(
+        std::chrono::duration_cast<std::chrono::seconds>(chrono_tm.time_since_epoch()).count());
+    tm.nsec = static_cast<CORBA::ULong>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(chrono_tm.time_since_epoch()).count());
     if(m_enabled)
     {
       compute_start = std::chrono::system_clock::now();
